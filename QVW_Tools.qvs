@@ -1,0 +1,25 @@
+
+sub fG.FileExists(Path,FileName)
+				let vG.FileSize = FileSize(PathOriginal);
+    set vG.FileExists = 0;
+    set vG.FileExists.StrReturn = 'Arquivo não existe:'+FileName;
+				if len(f.FileSize)>0 then
+      set vG.FileExists = 1;
+      set vG.FileExists.StrReturn = 'Arquivo existe:'+FileName;
+    endif
+end sub;
+
+
+sub StoreQVD(p.Path,p.FileName,p.ResidentName)
+    call StoreFile('$(p.Path)','$(p.FileName)','$(p.ResidentName)', 'qvd', '');
+end sub;
+sub StoreFile(p.Path,p.FileName,p.ResidentName, p.extensionFile, p.TypeFileToStore)
+  let p.extensionFile = Lower('$(p.extensionFile)');
+  if '$(p.extensionFile)' = 'qvd' then
+  	Store [$(p.ResidentName)] into [$(p.Path)$(p.FileName)]($(p.extensionFile));
+  else
+	  Store [$(p.ResidentName)] into [$(p.Path)$(p.FileName)]($(p.extensionFile), delimiter is ';');
+  endif
+
+end sub;
+

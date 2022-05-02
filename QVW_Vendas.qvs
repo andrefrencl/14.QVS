@@ -1,8 +1,8 @@
 //########################################################################################
-// Script de configura��o de vari�veis para o Qlik Sense
+// Script de configuracao de variaveis para o Qlik Sense
 // Baseado nos extratores do Qlikview
-// Autor: Andr� Ramos       Data: 28/04/2022
-// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lerá acentos.
+// Autor: Andre Ramos       Data: 28/04/2022
+// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lera acentos.
 //########################################################################################
 
 //####################################
@@ -30,15 +30,14 @@ sub vendas.start
 		trace ## Encerrado - Nao ha data para atualizar;
 	else 
 
-	let vID      = peek('ID',0,'temp');
-	let vEmpresa = peek('MARCA',0,'temp');
-	let vMetodo  = peek('METODO',0,'temp');
-	let vMonth   = peek('MONTHS',0,'temp');
-	let vAnoMes  = peek('ANOMES',0,'temp');
+		let vID      = peek('ID',0,'temp');
+		let vEmpresa = peek('MARCA',0,'temp');
+		let vMetodo  = peek('METODO',0,'temp');
+		let vMonth   = peek('MONTHS',0,'temp');
+		let vAnoMes  = peek('ANOMES',0,'temp');
 
 		drop table temp;
-		call vendas.$(vMetodo);
-		
+		call vendas.$(vMetodo);	
 
 	end if
 
@@ -50,13 +49,15 @@ end sub
 sub vendas.DIARIOBORDO
 		// preparando base
 		let vCarrega = $(vAnoMes)-$(vMonth);  // pega o ano mes baseado na data do txt - mes setado para carga
-
+  let vL.FileNameQVD = 'Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';
 		// verificando se tem o arquivo	
-		Let PathOriginal=Mid(DocumentPath(), 1, FindOneOf(DocumentPath(), '\', -2)) &
-			'$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';		
-		LET vListQVDExistsProjectactuals = NOT isnull(QVDCreateTime(PathOriginal));
-		IF not $(vListQVDExistsProjectactuals) THEN 
-			let vCarrega = date(addmonths(date(date#($(vCarrega),'YYYYMM')),-1),'YYYYMM');
+		//Let PathOriginal=Mid(DocumentPath(), 1, FindOneOf(DocumentPath(), '\', -2)) &
+		//	'$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';		
+		//LET vListQVDExistsProjectactuals = NOT isnull(QVDCreateTime(PathOriginal));
+		call fG.FileExists('$(vr.vendas)\Diario_de_Bordo\','$(vL.FileNameQVD)');
+		IF $(fG.FileExists)= 0 THEN 
+			// se nao tiver, pegar do mes anterior
+			let vCarrega = date(addmonths(date(date#($(vCarrega),'YYYYMM')),-1),'YYYYMM')-$(vMonth);
 		end if
 
 		$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega):
@@ -73,13 +74,14 @@ sub vendas.DIARIOBORDO
 			Next fieldIdx
 			Next tableIdx
 
-			call vendas.gravatxt (vID);
+			call vendas.gravatxt(vID);
 
 end sub
 
 
 sub vendas.gravatxt (ID_temp)
 
+	// TODOS DO TXT
 	temp:
 	LOAD *
 	FROM
@@ -87,20 +89,17 @@ sub vendas.gravatxt (ID_temp)
 	(txt, codepage is 28591, embedded labels, delimiter is ';', msq)
 	where ID<>$(ID_temp);
 
+	// LINHA ATUAL
 	Concatenate(temp)
 	LOAD 
-		ID, 
-		MARCA,
-		METODO, 
-		MONTHS, 
-		date($(vHoje),'YYYY-MM-DD') as DATA_ATUALIZAR
+		ID, MARCA, METODO, MONTHS, 
+		date($(vHoje)+1,'YYYY-MM-DD') as DATA_ATUALIZAR
 	FROM
 	[$(vr.qvs)config_vendas.txt]
 	(txt, codepage is 28591, embedded labels, delimiter is ';', msq)
 	where ID=$(ID_temp);
 	
-	
-	
+	Store temp into [$(vr.qvs)config_vendas.txt](txt, delimiter is ';');
 
 end sub
 

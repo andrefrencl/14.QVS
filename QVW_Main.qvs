@@ -1,9 +1,9 @@
 //########################################################################################
-// Script de configuraï¿½ï¿½o de variï¿½veis para o Qlik Sense
+// Script de configuracao de variaveis para o Qlik Sense
 // Baseado nos extratores do Qlikview
-// Autor: Andrï¿½ Ramos       Data: 28/04/2022
-// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lerÃ¡ acentos.
-//########################################################################################
+// Autor: Andre Ramos       Data: 28/04/2022
+// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lera aceneos.
+//####################################################################e###################
 
 sub main.variaveis.ambiente
 
@@ -21,15 +21,14 @@ sub main.variaveis.ambiente
 	SET FirstMonthOfYear=1;
 	SET CollationLocale='pt-BR';
 	SET MonthNames='jan;fev;mar;abr;mai;jun;jul;ago;set;out;nov;dez';
-	SET LongMonthNames='janeiro;fevereiro;marï¿½o;abril;maio;junho;julho;agosto;setembro;outubro;novembro;dezembro';
+	SET LongMonthNames='janeiro;fevereiro;março;abril;maio;junho;julho;agosto;setembro;outubro;novembro;dezembro';
 	SET DayNames='seg;ter;qua;qui;sex;sab;dom';
-	SET LongDayNames='segunda-feira;terï¿½a-feira;quarta-feira;quinta-feira;sexta-feira;sï¿½bado;domingo';
-	SET character_set_client='utf-8';
+	SET LongDayNames='segunda-feira;terça-feira;quarta-feira;quinta-feira;sexta-feira;sábado;domingo';
 	
 	set vr.raiz = '..\';
 
 	set vr.qvd = '$(vr.raiz)5.QVDs\';	
-		set vr.dimensoes = '$(vr.qvd)5.5.Dimensï¿½es\';
+		set vr.dimensoes = '$(vr.qvd)5.5.Dimensões\';
 		set vr.vendas = '$(vr.qvd)5.1.Vendas\';
 
 	set vr.entradas = '$(vr.raiz)3.Entradas\';
@@ -40,7 +39,17 @@ sub main.variaveis.ambiente
 		set vr.arquivos.0 = '$(vr.arquivos)0\';
 
 	set vr.qvs = '$(vr.raiz)14.QVS\';
-	
+ //frameworks
+	$(Must_Include=..\14.QVS\QVW_Tools.qvs);
+	$(Must_Include=..\14.QVS\QVW_Dimensoes.qvs);
+
+		call dimensao.dias.uteis;
+		call dimensao.compradores;
+		call dimensao.fornecedores.materiais;
+		call dimensao.estrutura.comercial;
+		call dimensao.cliente;
+
 	
 end sub
+call main.variaveis.ambiente;
 

@@ -230,7 +230,6 @@ sub dimensao.dias.uteis
 
 end sub
 
-
 sub dimensao.compradores
 
 	////////// carregando a carteira de compras ////////////////////
@@ -369,11 +368,11 @@ sub dimensao.cliente
 	mapa_assoc:
 	Mapping
 	LOAD Distinct BANDEIRA, 
-	     ASSOCIAï¿½ï¿½O as ASSOCIACAO
+	     ASSOCIAÇÃO as ASSOCIACAO
 	FROM
 	$(vPasta)$(vArquivo)
 	(ooxml, embedded labels, table is $(vPlanilha))
-	where len(trim(ASSOCIAï¿½ï¿½O))>0;
+	where len(trim(ASSOCIAÇÃO))>0;
 	
 	DIM_BANDEIRA_CLIENTE:
 	LOAD Distinct
