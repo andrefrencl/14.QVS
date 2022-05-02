@@ -1,13 +1,19 @@
 
 sub fG.FileExists(Path,FileName)
-				let vG.FileSize = FileSize(PathOriginal);
-    set vG.FileExists = 0;
-    set vG.FileExists.StrReturn = 'Arquivo nÃ£o existe:'+FileName;
-				if len(f.FileSize)>0 then
-      set vG.FileExists = 1;
-      set vG.FileExists.StrReturn = 'Arquivo existe:'+FileName;
-    endif
+
+      TRACE Inicio - fG.FileExists;
+			let vG.FileSize = FileSize(Path);
+      set vG.FileExists = 0;
+      set vG.FileExists.StrReturn = 'Arquivo não existe: $(FileName)';
+			if len(vG.FileSize)>0 then
+          set vG.FileExists = 1;
+          set vG.FileExists.StrReturn = 'Arquivo existe: $(FileName)';
+      endif
+      Trace --- Existe (0/1): $(vG.FileExists);
+      Trace --- Retorno: $(vG.FileExists.StrReturn);
+      
 end sub;
+
 
 
 sub StoreQVD(p.Path,p.FileName,p.ResidentName)

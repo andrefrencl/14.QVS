@@ -23,9 +23,9 @@ sub vendas.carrega_txt
 		date(date#(DATA_ATUALIZAR,'YYYY-MM-DD'),'YYYYMM') as ANOMES
 	FROM
 	[$(vr.qvs)config_vendas.txt]
-	(txt, codepage is 28591, embedded labels, delimiter is ';', msq)
+	(txt, utf8, embedded labels, delimiter is ';', msq)
 	where num(date(date#(DATA_ATUALIZAR,'YYYY-MM-DD')))<=$(vHoje);
-
+	
 	if NoOfRows('temp')=0 then
 		trace ## Encerrado - Nao ha data para atualizar;
 	else 
@@ -37,6 +37,17 @@ sub vendas.carrega_txt
 		let vAnoMes  = peek('ANOMES',0,'temp');
 
 		drop table temp;
+				trace vID      ;
+				trace $(vID)      ;
+				trace vEmpresa ;
+				trace $(vEmpresa) ;
+				trace vMetodo  ;
+				trace $(vMetodo)  ;
+				trace vMonth   ;
+				trace $(vMonth)   ;
+				trace vAnoMes  ;		
+				trace $(vAnoMes)  ;		
+
 		call vendas.$(vMetodo);	
 
 	end if
@@ -44,20 +55,34 @@ sub vendas.carrega_txt
 end sub
 
 
-
 /// QVD VENDAS_Diario_Bordo
 sub vendas.DIARIOBORDO
 		// preparando base
-		let vCarrega = $(vAnoMes)-$(vMonth);  // pega o ano mes baseado na data do txt - mes setado para carga
-  let vL.FileNameQVD = 'Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';
+		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
+		let vL.FileNameQVD = 'Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';
 		// verificando se tem o arquivo	
 		//Let PathOriginal=Mid(DocumentPath(), 1, FindOneOf(DocumentPath(), '\', -2)) &
 		//	'$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';		
 		//LET vListQVDExistsProjectactuals = NOT isnull(QVDCreateTime(PathOriginal));
-		call fG.FileExists('$(vr.vendas)\Diario_de_Bordo\','$(vL.FileNameQVD)');
-		IF $(fG.FileExists)= 0 THEN 
+
+		call fG.FileExists('$(vr.vendas)Diario_de_Bordo\','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 0 THEN 
 			// se nao tiver, pegar do mes anterior
-			let vCarrega = date(addmonths(date(date#($(vCarrega),'YYYYMM')),-1),'YYYYMM')-$(vMonth);
+			let vCarrega = date(
+						 	(num(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									)-1),'YYYYMM');
+		else 			
+			// se tiver, pegar de acordo com o config
+			let vCarrega = date(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									,'YYYYMM');
 		end if
 
 		$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega):
@@ -86,7 +111,7 @@ sub vendas.gravatxt (ID_temp)
 	LOAD *
 	FROM
 	[$(vr.qvs)config_vendas.txt]
-	(txt, codepage is 28591, embedded labels, delimiter is ';', msq)
+	(txt, utf8, embedded labels, delimiter is ';', msq)
 	where ID<>$(ID_temp);
 
 	// LINHA ATUAL
@@ -96,10 +121,11 @@ sub vendas.gravatxt (ID_temp)
 		date($(vHoje)+1,'YYYY-MM-DD') as DATA_ATUALIZAR
 	FROM
 	[$(vr.qvs)config_vendas.txt]
-	(txt, codepage is 28591, embedded labels, delimiter is ';', msq)
+	(txt, utf8, embedded labels, delimiter is ';', msq)
 	where ID=$(ID_temp);
 	
 	Store temp into [$(vr.qvs)config_vendas.txt](txt, delimiter is ';');
-
+	drop table temp;
+	
 end sub
 
