@@ -9,7 +9,7 @@
 // MAIN - START
 //####################################
 
-sub vendas.start
+sub vendas.carrega_txt
 
 	//lendo configuracoes de venda
 	let vHoje = num(date(today()));

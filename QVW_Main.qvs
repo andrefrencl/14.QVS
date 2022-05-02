@@ -39,17 +39,24 @@ sub main.variaveis.ambiente
 		set vr.arquivos.0 = '$(vr.arquivos)0\';
 
 	set vr.qvs = '$(vr.raiz)14.QVS\';
- //frameworks
-	$(Must_Include=..\14.QVS\QVW_Tools.qvs);
+ 
+	$(Must_Include=..\14.QVS\QVW_Tools.qvs);  //frameworks
 	$(Must_Include=..\14.QVS\QVW_Dimensoes.qvs);
+	$(Must_Include=..\14.QVS\QVW_Vendas.qvs);
+	call $(start.caller);
 
-		call dimensao.dias.uteis;
-		call dimensao.compradores;
-		call dimensao.fornecedores.materiais;
-		call dimensao.estrutura.comercial;
-		call dimensao.cliente;
-
-	
 end sub
-call main.variaveis.ambiente;
 
+sub start.dimensoes
+	call dimensao.dias.uteis;
+	call dimensao.compradores;
+	call dimensao.fornecedores.materiais;
+	call dimensao.estrutura.comercial;
+	call dimensao.cliente;
+end sub
+
+sub start.vendas
+	call vendas.carrega_txt;
+end sub
+
+call main.variaveis.ambiente;
