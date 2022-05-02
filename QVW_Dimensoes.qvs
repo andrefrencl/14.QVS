@@ -1,0 +1,408 @@
+//########################################################################################
+// Script para montagem de tabelas "dimensões" para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: André Ramos       Data: 28/04/2022
+//########################################################################################
+
+
+sub dimensao.dias.uteis
+
+	Trace *************************************************************************;
+	Trace DIM_DIAS_UTEIS ;
+	Trace *************************************************************************;
+	
+	/////////////////////////////////////////////////
+	//// ACERTANDO DIA UTIL - VARIAVEL
+	database:
+	LOAD UltimoDiaCarregadoSC
+	FROM
+	[$(vr.dimensoes)DATA_BASE_SANTA.QVD](qvd);
+	Let vDataCarregadoSC = peek('UltimoDiaCarregadoSC',0,'database');
+	drop table database;
+	
+	/////////////////////////////////////////////////////////////
+	// PAN
+	database:
+	LOAD UltimoDiaCarregadoPAN
+	FROM [$(vr.dimensoes)DATA_BASE_PAN.QVD](qvd);
+	Let vDataCarregado_PAN = peek('UltimoDiaCarregadoPAN',0,'database');
+	drop table database;
+	
+	// ONCO
+	database:
+	LOAD UltimoDiaCarregadoONCO
+	FROM [$(vr.dimensoes)DATA_BASE_ONCO.QVD](qvd);
+	Let vDataCarregado_ONCO = peek('UltimoDiaCarregadoONCO',0,'database');
+	drop table database;
+	
+	
+	/// vDataCarregado tem que ser pela maior data
+	if $(vDataCarregadoSC)>=$(vDataCarregado_PAN) then
+		if $(vDataCarregadoSC)>=$(vDataCarregado_ONCO) then
+			let vDataCarregado = $(vDataCarregadoSC);
+		ELSE 
+			if $(vDataCarregado_ONCO) > $(vDataCarregado_PAN) then
+				let vDataCarregado = $(vDataCarregado_ONCO);
+			else 
+				let vDataCarregado = $(vDataCarregado_PAN);
+			end if
+		end if
+	ELSE 
+		if $(vDataCarregado_PAN) > $(vDataCarregado_ONCO) then
+			let vDataCarregado = $(vDataCarregado_PAN);
+		else 
+			let vDataCarregado = $(vDataCarregado_ONCO);
+		end if
+	end if
+	
+	/// verificando se estão todos no mesmo mês
+	if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_PAN)) then
+		if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_ONCO)) then
+			if monthname($(vDataCarregado_PAN))=monthname($(vDataCarregado_ONCO)) then
+				// OK, está certo, continue.
+				TRACE DATAS NO MESMO MÊS FISCAL.;
+			ELSE 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+			end if
+			
+		else 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+		end if
+	ELSe 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+	end if
+	
+	
+	// INICIO
+	//-------------
+	LET vMesLoop = num(MONTH(vDataCarregado));
+	let vMesAno = monthname(vDataCarregado);
+	
+	///////////////////////////////////////////////////
+	//// script para carregar para saber data do dia util conforme DIAS_UTEIS__VARIAVEIS
+	//// considerando feriados
+	FeriadosBrasil:
+	LOAD
+	Concat(Date("FERIADOS",'DD/MM/YYYY'),';') as Feriados
+	FROM
+	[$(vr.entradas.vendas)feriados.xlsx]
+	(ooxml, embedded labels, table is Plan1);
+	//Declaração da variavé que recebera os feriados
+	LET strFeriados = Chr(39) & Replace(Peek('Feriados',0,'FeriadosBrasil'),';',Chr(39) & ',' & Chr(39)) & Chr(39);
+	// comando: =LastWorkDate(MonthStart(vData),$(vQtd),$(strFeriados))
+	// esse $(vQtd) vem do VAR_DIAS_UTEIS 
+	drop table FeriadosBrasil;
+	
+	//////////////////////////////////////////
+	for emp = 1 to 3
+	                  
+		if emp=1 then
+			let vEmpresa = 'SANTA';
+			let vNomeEmpresa = 'SANTACRUZ';
+		end if                        
+		if emp=2 then
+			let vEmpresa = 'PAN';
+			let vNomeEmpresa = 'PANPHARMA';
+		end if
+		if emp=3 then
+			let vEmpresa = 'ONCO';
+			let vNomeEmpresa = 'ONCOPROD';
+		end if
+		
+	////////////////////////////////////////////   
+	if vEmpresa='SANTA' then      
+	      let datacompara = vDataCarregadoSC;
+	      if num(month($(vDataCarregadoSC)),0) = $(vMesLoop) then
+	      	let vMesCerto = 1;
+	      else 
+	      	let vMesCerto = 0;
+	      end if
+	else 
+	      let datacompara = vDataCarregado_$(vEmpresa);
+	      if num(month($(vDataCarregado_$(vEmpresa))),0) = $(vMesLoop) then
+	      	let vMesCerto = 1;
+	      else 
+	      	let vMesCerto = 0;
+	      end if      
+	end if
+	
+	Dias:
+	LOAD 
+	      '$(vNomeEmpresa)' as EMPRESA,
+	      MonthName(Date#(DTA_ANOMES_DIAUTIL,'YYYYMM')) as MonthName,
+	//    num(date(Date#(DTA_ANOMES_DIAUTIL,'YYYYMM'))) as DATA,
+	    QTD_DIAS_UTEIS_MES, 
+	    QTD_DIAS_UTEIS_VARIAVEL
+	FROM
+	[$(vr.dimensoes)BW_DIAS_UTEIS_$(vEmpresa).qvd](qvd)
+	//[$(vr.dimensoes)BW_DIAS_UTEIS_SANTA.qvd](qvd)
+	where year(Date#(DTA_ANOMES_DIAUTIL,'YYYYMM')) = year('$(datacompara)');
+	
+	TESTEDIA:
+	load
+	     QTD_DIAS_UTEIS_VARIAVEL as Var, 
+	     QTD_DIAS_UTEIS_MES as VarM
+	Resident Dias
+	where  MonthName = '$(vMesAno)';
+	LET vQtd = peek('Var',0,'TESTEDIA');
+	LET vQtdMes = peek('VarM',0,'TESTEDIA');
+	drop table TESTEDIA;
+	
+	Let vUtilData_$(vEmpresa) = NetWorkDays(MonthStart(datacompara),datacompara,$(strFeriados));
+	let utildatacompara = vUtilData_$(vEmpresa);
+	
+	if vQtd <> utildatacompara then
+	if vQtd <= 0 and vMesCerto=0 then
+		let utildatacompara = 0;
+	end if 	
+	      
+	      /////////////////////////////////////////////////////////////////
+	      /// precisa atualizar tabela DIAS_UTEIS que está errado!
+	      DiasNovo:
+	      load
+		            EMPRESA as x,
+	           MonthName as a, 
+	           QTD_DIAS_UTEIS_MES as b,  
+	           QTD_DIAS_UTEIS_VARIAVEL as c
+	     Resident Dias
+	      where MonthName <> '$(vMesAno)';
+	      Drop table Dias;
+	
+	      Dias:
+	      load
+	            x as EMPRESA1,
+	           a as MonthName1, 
+	           b as QTD_DIAS_UTEIS_MES1,  
+	           c as QTD_DIAS_UTEIS_VARIAVEL1
+	     Resident DiasNovo
+	     order by a asc;
+	     
+	      drop table DiasNovo;
+	
+		
+	
+	      // criando novo mes atual     
+	      LOAD col0 as EMPRESA1, Date#(col1,'MMM YYYY') as MonthName1, col2 as QTD_DIAS_UTEIS_VARIAVEL1, col3 as QTD_DIAS_UTEIS_MES1
+	      INLINE [
+	          col0, col1, col2, col3
+	          $(vNomeEmpresa), $(vMesAno), $(utildatacompara), $(vQtdMes)
+	        ];
+	
+	
+	            /// Montando tabela
+	            TAB_DIASUTEIS:
+	            load
+	                  EMPRESA1 as EMPRESA,
+	                  MonthName1 as MonthName,
+	                  EMPRESA1&'-'&MonthName1 as CHAVE_DIASUTEIS,
+	                  QTD_DIAS_UTEIS_MES1 as QTD_DIAS_UTEIS_MES,
+	                  QTD_DIAS_UTEIS_VARIAVEL1 as QTD_DIAS_UTEIS_VARIAVEL
+	            Resident Dias;
+	            drop table Dias;
+	
+        else 
+        
+        /// Montando tabela
+        TAB_DIASUTEIS:
+        load
+            EMPRESA,
+            MonthName,
+            EMPRESA&'-'&MonthName as CHAVE_DIASUTEIS,
+            QTD_DIAS_UTEIS_MES,
+            QTD_DIAS_UTEIS_VARIAVEL
+        Resident Dias;
+        drop table Dias;
+        
+        end if
+
+    NEXT
+
+    NoConcatenate
+    DIM_DIAS_UTEIS:
+    load
+        CHAVE_DIASUTEIS,
+        QTD_DIAS_UTEIS_MES as UTEIS_MES,
+        QTD_DIAS_UTEIS_VARIAVEL as UTEIS_VAR
+    Resident TAB_DIASUTEIS
+    where MonthName = '$(vMesAno)';
+    drop table TAB_DIASUTEIS;
+
+
+end sub
+
+
+sub dimensao.compradores
+
+	////////// carregando a carteira de compras ////////////////////
+	////////// CRIADO por Andre Ramos
+	
+	$(include=..\3.Entradas\0 INCLUDE\CARTEIRA_COMPRAS_QVD.txt);
+	
+	/// adaptando ao codigo do app
+	DIM_COMPRADOR:
+		LOAD Distinct
+			 CHAVE_COMPRADOR as [Key Comprador Marca Subsort],
+	//	     COD_F as CODF_COMPRADOR,
+	//	     REGIAO_COMPRADOR,
+		     UPPER(COMPRADOR) AS COMPRADOR,
+		     upper(GERENTE_CATEGORIA) as GERENCIA
+		Resident temp_comprador
+		where wildmatch(REGIAO_COMPRADOR,'SC','PAN')
+		;
+		drop table temp_comprador;
+
+end sub
+
+sub dimensao.fornecedores.materiais
+
+	Trace *************************************************************************;
+	Trace DIM_MATERIAIS ;
+	Trace *************************************************************************;
+	
+	//// TUDO numa TABELA SÓ
+	
+	NoConcatenate
+	DIM_MATERIAIS:
+	LOAD 
+		COD_MATERIAL&'-'&DES_CD_M AS [Key Cod Mat CD],
+		num(right(COD_MATERIAL,6),0) as  COD_SAP, 	
+		DES_CD_M as DES_CD,
+		COD_FORNECEDOR_PFAT as COD_SUBSORTIMENTO,	
+	 	COD_BAND_GMR,
+	 	DES_BAND_GMR,
+	 	DES_BAND_FORNECEDOR as DES_FORNECEDOR,
+	 	Pacote as CATEGORIA_PRODUTO,
+	    COD_ORIGEM&' - '&DES_ORIGEM AS DES_ORIGEM
+	 FROM
+	[$(vr.dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
+	where len(trim(DES_CD_M))>0 or len(trim(COD_MATERIAL))>0;
+	
+	
+	left join (DIM_MATERIAIS)
+	LOAD 
+		num(right(COD_MATERIAL_SAPa,6),0) as  COD_SAP, 	
+	     ULT_COD_SCRUZ as COD_MATERIAL_PFAT, 
+	     COD_EAN_MATERIAL, 
+	     NME_MATERIAL
+	FROM
+	[$(vr.dimensoes)BW_MATERIAL.QVD]
+	(qvd)
+	where len(trim(COD_MATERIAL_SAPa))>0;
+	
+	Mapping	
+	MAP_MARCA:
+	LOAD ULT_COD_SCRUZ, 
+	     MARCA_DESC as MARCA
+	FROM [$(vr.arquivos.0)Marca.xlsx]
+	(ooxml, embedded labels, table is Planilha1);
+	
+	DIM_PRODUTOS_CLOSEUP:
+	LOAD Distinct
+	     ULT_PFAT as COD_MATERIAL_PFAT, 
+	     if(len(trim(MARCA_DESC))=0, ApplyMap('MAP_MARCA',ULT_PFAT,null()),MARCA_DESC) as MARCA_DESC,
+	     MOLECULA_DESC, 
+	     CLASSE_I, 
+	     CLASSE_II, 
+	     CLASSE_III, 
+	     CLASSE_IV, 
+	     EAN_CUP
+	FROM
+	[$(vr.entradas.FF)FLASH_CLOSEUP_Produtos.QVD]
+	(qvd)
+	where len(trim(ULT_PFAT))>0 ;
+	
+
+end sub
+
+sub dimensao.estrutura.comercial
+
+	Trace *************************************************************************;
+	Trace DIM_ESTRUTURA_COMERCIAL ;
+	Trace *************************************************************************;
+	
+	DIM_ESTRUTURA_COMERCIAL:
+	LOAD Distinct
+	      COD_CLIENTE_SAP&'-'&COD_SETOR_ATIVIDADE&'-'&COD_ORGANIZACAO_VENDAS &'-'&COD_CANAL_DISTRIBUICAO as [Key Cliente], 
+	      COD_SETOR, 
+	      COD_SUPERVISOR, 
+	      COD_REGIAO, 
+	      NME_GRV,
+	      NME_GV,
+	      NME_REGIAO, 
+	      NME_SUPERVISOR, 
+	      NME_SETOR
+	FROM [$(vr.dimensoes)BW_ESTRUTURA_COMERCIAL.QVD] (qvd)
+	where len(trim(NME_GRV))>0;
+
+end sub
+
+sub dimensao.cliente
+
+	Trace *************************************************************************;
+	Trace DIM_BANDEIRA e DIM_CLIENTES ;
+	Trace *************************************************************************;
+	
+	//-------------------------------------------------------------
+	temp:
+	LOAD CAMINHO, 
+	     ARQUIVO,
+	     PLANILHA
+	FROM
+	[$(vr.arquivos.0)Endereco_Arquivos.xlsx]
+	(ooxml, embedded labels, table is Plan1)
+	where CHAVE = 'BANDAGRUPADO';
+	let vPasta = peek('CAMINHO',0,'temp');
+	let vArquivo = peek('ARQUIVO',0,'temp');
+	let vPlanilha = peek('PLANILHA',0,'temp');
+	drop table temp;
+	
+	mapa_agru:
+	Mapping
+	LOAD Distinct
+		 BANDEIRA, 
+	     BANDEIRA_AGRUPADA
+	FROM
+	$(vPasta)$(vArquivo)
+	(ooxml, embedded labels, table is $(vPlanilha))
+	where len(trim(BANDEIRA_AGRUPADA))>0;
+	
+	mapa_assoc:
+	Mapping
+	LOAD Distinct BANDEIRA, 
+	     ASSOCIAÇÃO as ASSOCIACAO
+	FROM
+	$(vPasta)$(vArquivo)
+	(ooxml, embedded labels, table is $(vPlanilha))
+	where len(trim(ASSOCIAÇÃO))>0;
+	
+	DIM_BANDEIRA_CLIENTE:
+	LOAD Distinct
+	      COD_CLIENTE_SAP&'-'&COD_SETOR_ATIVIDADE&'-'&COD_ORGANIZACAO_VENDAS &'-'&COD_CANAL_DISTRIBUICAO as [Key Cliente], 
+	//      num(right(COD_CLIENTE_SAP,6)) as COD_CLIENTE_SAP,
+	      COD_BANDEIRA_CLIENTE, 
+	      NME_BANDEIRA_CLIENTE, 
+	      NME_SEGMT_CLIENTE,
+	      ApplyMap('mapa_agru',NME_BANDEIRA_CLIENTE,null()) as NME_BANDEIRA_AGRUPADA,
+	      ApplyMap('mapa_assoc',NME_BANDEIRA_CLIENTE,null()) as NME_ASSOCIACAO_BANDEIRA
+	FROM [$(vr.dimensoes)BW_ESTRUTURA_COMERCIAL.QVD] (qvd)
+	where len(trim(COD_BANDEIRA_CLIENTE))>0;
+	      
+	
+	DIM_CLIENTE:      
+	LOAD Distinct
+	     num(right(COD_CLIENTE_SAP,6)) as COD_CLIENTE_SAP,
+	     NUM_CNPJ, 
+	     NUM_CPF, 
+	     NME_RAZAO_SOCIAL, 
+	     NME_CLIENTE_REDUZIDO, 
+	     NME_ENDERECO_CLIENTE, 
+	     NME_CIDADE_CLIENTE, 
+	     NME_BAIRRO_CLIENTE, 
+	 	 COD_UF_CLIENTE, 
+	     NME_UF_CLIENTE,
+	     DES_GRUPO_CLIENTE 
+	//     COD_CLIENTE_PFAT
+	FROM [$(vr.dimensoes)BW_Customer.QVD] (qvd)
+	where len(trim(COD_CLIENTE_SAP))>0;
+	
+end sub

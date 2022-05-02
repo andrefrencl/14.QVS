@@ -1,0 +1,40 @@
+//########################################################################################
+// Script de configuração de variáveis para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: André Ramos       Data: 28/04/2022
+//########################################################################################
+
+sub main.variaveis.ambiente
+
+	SET ThousandSep='.';
+	SET DecimalSep=',';
+	SET MoneyThousandSep='.';
+	SET MoneyDecimalSep=',';
+	SET MoneyFormat='R$#.##0,00;-R$#.##0,00';
+	SET TimeFormat='hh:mm:ss';
+	SET DateFormat='DD/MM/YYYY';
+	SET TimestampFormat='DD/MM/YYYY hh:mm:ss[.fff]';
+	SET FirstWeekDay=6;
+	SET BrokenWeeks=1;
+	SET ReferenceDay=0;
+	SET FirstMonthOfYear=1;
+	SET CollationLocale='pt-BR';
+	SET MonthNames='jan;fev;mar;abr;mai;jun;jul;ago;set;out;nov;dez';
+	SET LongMonthNames='janeiro;fevereiro;março;abril;maio;junho;julho;agosto;setembro;outubro;novembro;dezembro';
+	SET DayNames='seg;ter;qua;qui;sex;sáb;dom';
+	SET LongDayNames='segunda-feira;terça-feira;quarta-feira;quinta-feira;sexta-feira;sábado;domingo';
+	
+	set vr.raiz = '..\';
+
+	set vr.qvd = '$(vr.raiz)5.QVDs\';	
+		set vr.dimensoes = '$(vr.qvd)5.5.Dimensões\';
+	
+	set vr.entradas = '$(vr.raiz)3.Entradas\';
+		set vr.entradas.vendas = '$(vr.entradas)Vendas\';
+		set vr.entradas.FF = '$(vr.entradas)FF\QVD\';
+	
+	set vr.arquivos = '$(vr.raiz)12.Arquivos\';
+		set vr.arquivos.0 = '$(vr.arquivos)0\';
+	
+end sub
+
