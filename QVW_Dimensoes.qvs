@@ -1,7 +1,7 @@
 //########################################################################################
-// Script para montagem de tabelas "dimensões" para o Qlik Sense
+// Script para montagem de tabelas "dimensoes" para o Qlik Sense
 // Baseado nos extratores do Qlikview
-// Autor: André Ramos       Data: 28/04/2022
+// Autor: Andre Ramos       Data: 28/04/2022
 //########################################################################################
 
 
@@ -55,12 +55,12 @@ sub dimensao.dias.uteis
 		end if
 	end if
 	
-	/// verificando se estão todos no mesmo mês
+	/// verificando se est�o todos no mesmo m�s
 	if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_PAN)) then
 		if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_ONCO)) then
 			if monthname($(vDataCarregado_PAN))=monthname($(vDataCarregado_ONCO)) then
-				// OK, está certo, continue.
-				TRACE DATAS NO MESMO MÊS FISCAL.;
+				// OK, est� certo, continue.
+				TRACE DATAS NO MESMO M�S FISCAL.;
 			ELSE 
 				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
 			end if
@@ -87,7 +87,7 @@ sub dimensao.dias.uteis
 	FROM
 	[$(vr.entradas.vendas)feriados.xlsx]
 	(ooxml, embedded labels, table is Plan1);
-	//Declaração da variavé que recebera os feriados
+	//Declara��o da variav� que recebera os feriados
 	LET strFeriados = Chr(39) & Replace(Peek('Feriados',0,'FeriadosBrasil'),';',Chr(39) & ',' & Chr(39)) & Chr(39);
 	// comando: =LastWorkDate(MonthStart(vData),$(vQtd),$(strFeriados))
 	// esse $(vQtd) vem do VAR_DIAS_UTEIS 
@@ -157,7 +157,7 @@ sub dimensao.dias.uteis
 	end if 	
 	      
 	      /////////////////////////////////////////////////////////////////
-	      /// precisa atualizar tabela DIAS_UTEIS que está errado!
+	      /// precisa atualizar tabela DIAS_UTEIS que est� errado!
 	      DiasNovo:
 	      load
 		            EMPRESA as x,
@@ -259,7 +259,7 @@ sub dimensao.fornecedores.materiais
 	Trace DIM_MATERIAIS ;
 	Trace *************************************************************************;
 	
-	//// TUDO numa TABELA SÓ
+	//// TUDO numa TABELA S�
 	
 	NoConcatenate
 	DIM_MATERIAIS:
@@ -369,11 +369,11 @@ sub dimensao.cliente
 	mapa_assoc:
 	Mapping
 	LOAD Distinct BANDEIRA, 
-	     ASSOCIAÇÃO as ASSOCIACAO
+	     ASSOCIA��O as ASSOCIACAO
 	FROM
 	$(vPasta)$(vArquivo)
 	(ooxml, embedded labels, table is $(vPlanilha))
-	where len(trim(ASSOCIAÇÃO))>0;
+	where len(trim(ASSOCIA��O))>0;
 	
 	DIM_BANDEIRA_CLIENTE:
 	LOAD Distinct

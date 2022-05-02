@@ -1,0 +1,106 @@
+//########################################################################################
+// Script de configura��o de vari�veis para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andr� Ramos       Data: 28/04/2022
+// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lerá acentos.
+//########################################################################################
+
+//####################################
+// MAIN - START
+//####################################
+
+sub vendas.start
+
+	//lendo configuracoes de venda
+	let vHoje = num(date(today()));
+
+	temp:
+	first 1
+	LOAD ID, 
+		MARCA,
+		METODO, 
+		MONTHS, 
+		date(date#(DATA_ATUALIZAR,'YYYY-MM-DD'),'YYYYMM') as ANOMES
+	FROM
+	[$(vr.qvs)config_vendas.txt]
+	(txt, codepage is 28591, embedded labels, delimiter is ';', msq)
+	where num(date(date#(DATA_ATUALIZAR,'YYYY-MM-DD')))<=$(vHoje);
+
+	if NoOfRows('temp')=0 then
+		trace ## Encerrado - Nao ha data para atualizar;
+	else 
+
+	let vID      = peek('ID',0,'temp');
+	let vEmpresa = peek('MARCA',0,'temp');
+	let vMetodo  = peek('METODO',0,'temp');
+	let vMonth   = peek('MONTHS',0,'temp');
+	let vAnoMes  = peek('ANOMES',0,'temp');
+
+		drop table temp;
+		call vendas.$(vMetodo);
+		
+
+	end if
+
+end sub
+
+
+
+/// QVD VENDAS_Diario_Bordo
+sub vendas.DIARIOBORDO
+		// preparando base
+		let vCarrega = $(vAnoMes)-$(vMonth);  // pega o ano mes baseado na data do txt - mes setado para carga
+
+		// verificando se tem o arquivo	
+		Let PathOriginal=Mid(DocumentPath(), 1, FindOneOf(DocumentPath(), '\', -2)) &
+			'$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';		
+		LET vListQVDExistsProjectactuals = NOT isnull(QVDCreateTime(PathOriginal));
+		IF not $(vListQVDExistsProjectactuals) THEN 
+			let vCarrega = date(addmonths(date(date#($(vCarrega),'YYYYMM')),-1),'YYYYMM');
+		end if
+
+		$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega):
+		load * 
+		from [$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD](qvd);
+
+		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
+			For tableIdx = 0 to NoOfTables() - 1
+			Let vTableName = TableName($(tableIdx));
+			Let vPrefix = '$(vMetodo)_';
+			For fieldIdx = 1 to NoOfFields('$(vTableName)')
+				LET vFieldname = FieldName($(fieldIdx), '$(vTableName)');
+				RENAME Field [$(vFieldname)] TO [$(vPrefix)$(vFieldname)];
+			Next fieldIdx
+			Next tableIdx
+
+			call vendas.gravatxt (vID);
+
+end sub
+
+
+sub vendas.gravatxt (ID_temp)
+
+	temp:
+	LOAD *
+	FROM
+	[$(vr.qvs)config_vendas.txt]
+	(txt, codepage is 28591, embedded labels, delimiter is ';', msq)
+	where ID<>$(ID_temp);
+
+	Concatenate(temp)
+	LOAD 
+		ID, 
+		MARCA,
+		METODO, 
+		MONTHS, 
+		date($(vHoje),'YYYY-MM-DD') as DATA_ATUALIZAR
+	FROM
+	[$(vr.qvs)config_vendas.txt]
+	(txt, codepage is 28591, embedded labels, delimiter is ';', msq)
+	where ID=$(ID_temp);
+	
+	
+	
+
+end sub
+
