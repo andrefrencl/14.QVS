@@ -2,24 +2,82 @@
 sub fG.FileExists(Path,FileName)
 
       TRACE Inicio - fG.FileExists;
-			let vG.FileSize = FileSize(Path);
+			let vG.FileSize = FileSize('$(Path)$(FileName)');
       set vG.FileExists = 0;
-      set vG.FileExists.StrReturn = 'Arquivo não existe: $(FileName)';
+      set vG.FileExists.StrReturn = 'Arquivo na existe: $(FileName)';
 			if len(vG.FileSize)>0 then
           set vG.FileExists = 1;
           set vG.FileExists.StrReturn = 'Arquivo existe: $(FileName)';
       endif
+      trace --- Arquivo:$(Path)$(FileName);
       Trace --- Existe (0/1): $(vG.FileExists);
+      Trace --- FileSize: $(vG.FileSize);
       Trace --- Retorno: $(vG.FileExists.StrReturn);
       
 end sub;
 
-
-
-sub StoreQVD(p.Path,p.FileName,p.ResidentName)
-    call StoreFile('$(p.Path)','$(p.FileName)','$(p.ResidentName)', 'qvd', '');
+sub fG.QvdGeradoPeloExtrator(p.Metodo)
+  call fG.MarqueSemaforo('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', 1);
 end sub;
-sub StoreFile(p.Path,p.FileName,p.ResidentName, p.extensionFile, p.TypeFileToStore)
+sub fG.DataTransferValidarPodeProcessar(p.Metodo, p.CallBack, p.PodeInformarQFinalizou)
+  call fG.DataTransferValidarSeTemParaProcessar('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', '$(p.CallBack)', $(p.PodeInformarQFinalizou));
+end sub;
+
+sub fG.DataTransferValidarSeTemParaProcessar(p.Path, p.FileName, p.Metodo, p.CallBack, p.PodeInformarQFinalizou)
+
+  call fG.FileExists('$(p.Path)','$(p.FileName)');
+  if vG.FileExists = 1 then
+    noconcatenate
+    semaforo_$(p.Metodo):
+    first 1 LOAD *
+    from [$(p.Path)$(p.FileName)]
+    (txt, utf8, embedded labels, delimiter is ';', msq)
+    where status = 'QVDGeradoPeloExtrator'
+    ;
+
+
+    if alt(NoOfRows('semaforo_$(p.Metodo)'),0)=0 then
+      trace ## Encerrado - Extrator nao gerou pendencias;
+      drop table semaforo_$(p.Metodo);
+      
+    else 
+      trace --- esta pendente para processar;
+      drop table semaforo_$(p.Metodo);
+      call $(p.CallBack);
+      if $(p.PodeInformarQFinalizou) = 1 then
+        call fG.MarqueSemaforo('$(p.Path)','$(p.FileName)','$(p.Metodo)', 0)
+      endif
+    endif
+  endif
+end sub;
+
+sub fG.MarqueSemaforo(p.Path,p.FileName,p.Metodo, is_gerado)
+  /*
+    marcar como gerado qvd
+    marcar como processodo
+  */
+  trace --- Iniciou fG.MarqueSemaforo;
+  trace --- p.Path: $(p.Path),p.FileName: $(p.FileName),p.Metodo: $(p.Metodo),is_gerado: $(is_gerado);
+  set vL.status = 'QVDGeradoPeloExtrator';
+  if $(is_gerado) = 0 then
+    set vL.status = 'DataTransferProcessou';
+  endif 
+
+  noconcatenate
+  semaforo_$(p.Metodo):
+  LOAD
+      '$(vL.status)' as status,
+      now() as Data
+  AutoGenerate 1;
+  call StoreFile('$(p.Path)','$(p.FileName)','semaforo_$(p.Metodo)', 'txt',1);
+end sub;
+
+sub StoreQVD(p.Path,p.FileName,p.ResidentName,is_Drop)
+    call StoreFile('$(p.Path)','$(p.FileName)','$(p.ResidentName)', 'qvd',$(is_Drop));
+end sub;
+sub StoreFile(p.Path,p.FileName,p.ResidentName, p.extensionFile, is_Drop)
+  trace ---  Iniciou StoreFile;
+  trace --- p.Path:$(p.Path), p.FileName: $(p.FileName), p.ResidentName: $(p.ResidentName), p.extensionFile: $(p.extensionFile) ;
   let p.extensionFile = Lower('$(p.extensionFile)');
   if '$(p.extensionFile)' = 'qvd' then
   	Store [$(p.ResidentName)] into [$(p.Path)$(p.FileName)]($(p.extensionFile));
@@ -27,5 +85,8 @@ sub StoreFile(p.Path,p.FileName,p.ResidentName, p.extensionFile, p.TypeFileToSto
 	  Store [$(p.ResidentName)] into [$(p.Path)$(p.FileName)]($(p.extensionFile), delimiter is ';');
   endif
 
+  if $(is_Drop) = 1 then
+    drop table $(p.ResidentName);
+  endif
 end sub;
 

@@ -39,7 +39,9 @@ sub main.variaveis.ambiente
 		set vr.arquivos.0 = '$(vr.arquivos)0\';
 
 	set vr.qvs = '$(vr.raiz)14.QVS\';
- 
+ 		set vr.qvs.txt = '$(vr.qvs)TXT\';
+	trace --- $(vr.qvs.txt);
+
 	$(Must_Include=..\14.QVS\QVW_Tools.qvs);  //frameworks
 	$(Must_Include=..\14.QVS\QVW_Dimensoes.qvs);
 	$(Must_Include=..\14.QVS\QVW_Vendas.qvs);
@@ -47,7 +49,26 @@ sub main.variaveis.ambiente
 
 end sub
 
+sub start.vendasdiariobordo
+			call fG.DataTransferValidarPodeProcessar('vendasdiariobordo', 'start.vendasdiariobordoCompleto',0);
+end sub;
+sub start.FimExtratorVendasDiarioBordo
+	call fG.QvdGeradoPeloExtrator('vendasdiariobordo');
+end sub;
+sub start.vendasdiariobordoCompleto
+	call vendas.carrega_txt('vendasdiariobordo');
+end sub
+
+
+
+sub start.FimExtratorDimensoes
+	call fG.QvdGeradoPeloExtrator('dimensoes');
+end sub;
+
 sub start.dimensoes
+			call fG.DataTransferValidarPodeProcessar('dimensoes', 'start.dimensoesCompleto',1);
+end sub;
+sub start.dimensoesCompleto
 	call dimensao.dias.uteis;
 	call dimensao.compradores;
 	call dimensao.fornecedores.materiais;
@@ -55,8 +76,5 @@ sub start.dimensoes
 	call dimensao.cliente;
 end sub
 
-sub start.vendas
-	call vendas.carrega_txt;
-end sub
 
 call main.variaveis.ambiente;

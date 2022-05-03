@@ -9,7 +9,7 @@
 // MAIN - START
 //####################################
 
-sub vendas.carrega_txt
+sub vendas.carrega_txt(p.Metodo)
 
 	//lendo configuracoes de venda
 	let vHoje = num(date(today()));
@@ -27,7 +27,9 @@ sub vendas.carrega_txt
 	where num(date(date#(DATA_ATUALIZAR,'YYYY-MM-DD')))<=$(vHoje);
 	
 	if NoOfRows('temp')=0 then
-		trace ## Encerrado - Nao ha data para atualizar;
+		trace ## Encerrado - Nao ha vendas $(p.Metodo) para atualizar;
+		call fG.MarqueSemaforo('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', 0);
+
 	else 
 
 		let vID      = peek('ID',0,'temp');
