@@ -88,18 +88,22 @@ sub vendas.DIARIOBORDO
 		end if
 
 		$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega):
-		load * 
+		load *
 		from [$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD](qvd);
 
 		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
-			For tableIdx = 0 to NoOfTables() - 1
+			/* For tableIdx = 0 to NoOfTables() - 1
 			Let vTableName = TableName($(tableIdx));
 			Let vPrefix = '$(vMetodo)_';
 			For fieldIdx = 1 to NoOfFields('$(vTableName)')
 				LET vFieldname = FieldName($(fieldIdx), '$(vTableName)');
 				RENAME Field [$(vFieldname)] TO [$(vPrefix)$(vFieldname)];
 			Next fieldIdx
-			Next tableIdx
+			Next tableIdx*/
+
+			/// TEMPORARIO - STORE DO QVD VENDAS
+			STORE $(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega) into [QVD\$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega).qvd](qvd);
+
 
 			call vendas.gravatxt(vID);
 

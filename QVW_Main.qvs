@@ -40,14 +40,95 @@ sub main.variaveis.ambiente
 
 	set vr.qvs = '$(vr.raiz)14.QVS\';
  		set vr.qvs.txt = '$(vr.qvs)TXT\';
-	trace --- $(vr.qvs.txt);
+
+	set vr.datatransfer = '$(vr.raiz)13.DataTransfer\';
+		set vr.datatransfer.qvd = '$(vr.datatransfer)QVD\';
+
+	set vr.imagens = '$(vr.raiz)1.Config\';
+		set vr.imagens.logos = '$(vr.imagens)Imagens\';
 
 	$(Must_Include=..\14.QVS\QVW_Tools.qvs);  //frameworks
 	$(Must_Include=..\14.QVS\QVW_Dimensoes.qvs);
+	$(Must_Include=..\14.QVS\QVW_Inline.qvs);
 	$(Must_Include=..\14.QVS\QVW_Vendas.qvs);
+	
 	call $(start.caller);
 
 end sub
+
+//####################################################
+// DESCOBRINDO A DATA BASE da CARGA DOS QVDS
+//####################################################
+
+sub main.data_base
+	
+	/////////////////////////////////////////////////
+	//// DATA BASE ATUAL
+	database:
+	LOAD UltimoDiaCarregadoSC
+	FROM
+	[$(vr.dimensoes)DATA_BASE_SANTA.QVD](qvd);
+	Let vDataCarregadoSC = peek('UltimoDiaCarregadoSC',0,'database');
+	drop table database;
+	
+	// PAN
+	database:
+	LOAD UltimoDiaCarregadoPAN
+	FROM [$(vr.dimensoes)DATA_BASE_PAN.QVD](qvd);
+	Let vDataCarregado_PAN = peek('UltimoDiaCarregadoPAN',0,'database');
+	drop table database;
+	
+	// ONCO
+	database:
+	LOAD UltimoDiaCarregadoONCO
+	FROM [$(vr.dimensoes)DATA_BASE_ONCO.QVD](qvd);
+	Let vDataCarregado_ONCO = peek('UltimoDiaCarregadoONCO',0,'database');
+	drop table database;
+	
+	
+	/// vDataCarregado tem que ser pela maior data
+	if $(vDataCarregadoSC)>=$(vDataCarregado_PAN) then
+		if $(vDataCarregadoSC)>=$(vDataCarregado_ONCO) then
+			let vDataCarregado = $(vDataCarregadoSC);
+		ELSE 
+			if $(vDataCarregado_ONCO) > $(vDataCarregado_PAN) then
+				let vDataCarregado = $(vDataCarregado_ONCO);
+			else 
+				let vDataCarregado = $(vDataCarregado_PAN);
+			end if
+		end if
+	ELSE 
+		if $(vDataCarregado_PAN) > $(vDataCarregado_ONCO) then
+			let vDataCarregado = $(vDataCarregado_PAN);
+		else 
+			let vDataCarregado = $(vDataCarregado_ONCO);
+		end if
+	end if
+	
+	/// verificando se est�o todos no mesmo m�s
+	if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_PAN)) then
+		if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_ONCO)) then
+			if monthname($(vDataCarregado_PAN))=monthname($(vDataCarregado_ONCO)) then
+				// OK, est� certo, continue.
+				TRACE DATAS NO MESMO M�S FISCAL.;
+			ELSE 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+			end if
+			
+		else 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+		end if
+	ELSe 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+	end if
+
+
+end sub;
+
+
+//########################################
+// VENDAS - DIARIO DE BORDO
+//########################################
 
 sub start.vendasdiariobordo
 			call fG.DataTransferValidarPodeProcessar('vendasdiariobordo', 'start.vendasdiariobordoCompleto',0);
@@ -59,14 +140,16 @@ sub start.vendasdiariobordoCompleto
 	call vendas.carrega_txt('vendasdiariobordo');
 end sub
 
-
+//########################################
+// DIMENSOES
+//########################################
 
 sub start.FimExtratorDimensoes
 	call fG.QvdGeradoPeloExtrator('dimensoes');
 end sub;
 
 sub start.dimensoes
-			call fG.DataTransferValidarPodeProcessar('dimensoes', 'start.dimensoesCompleto',1);
+	call fG.DataTransferValidarPodeProcessar('dimensoes', 'start.dimensoesCompleto',1);
 end sub;
 sub start.dimensoesCompleto
 	call dimensao.dias.uteis;
@@ -76,5 +159,14 @@ sub start.dimensoesCompleto
 	call dimensao.cliente;
 end sub
 
+
+//########################################
+// INLINES
+//########################################
+sub start.inlineCompleto
+	call inline_tab.metricas;
+	call inline_tab.vDataCarregado;
+	call inline_tab.marca_logo;
+end sub
 
 call main.variaveis.ambiente;

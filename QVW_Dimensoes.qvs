@@ -4,74 +4,14 @@
 // Autor: Andre Ramos       Data: 28/04/2022
 //########################################################################################
 
-
 sub dimensao.dias.uteis
 
 	Trace *************************************************************************;
 	Trace DIM_DIAS_UTEIS ;
 	Trace *************************************************************************;
 	
-	/////////////////////////////////////////////////
-	//// ACERTANDO DIA UTIL - VARIAVEL
-	database:
-	LOAD UltimoDiaCarregadoSC
-	FROM
-	[$(vr.dimensoes)DATA_BASE_SANTA.QVD](qvd);
-	Let vDataCarregadoSC = peek('UltimoDiaCarregadoSC',0,'database');
-	drop table database;
-	
-	/////////////////////////////////////////////////////////////
-	// PAN
-	database:
-	LOAD UltimoDiaCarregadoPAN
-	FROM [$(vr.dimensoes)DATA_BASE_PAN.QVD](qvd);
-	Let vDataCarregado_PAN = peek('UltimoDiaCarregadoPAN',0,'database');
-	drop table database;
-	
-	// ONCO
-	database:
-	LOAD UltimoDiaCarregadoONCO
-	FROM [$(vr.dimensoes)DATA_BASE_ONCO.QVD](qvd);
-	Let vDataCarregado_ONCO = peek('UltimoDiaCarregadoONCO',0,'database');
-	drop table database;
-	
-	
-	/// vDataCarregado tem que ser pela maior data
-	if $(vDataCarregadoSC)>=$(vDataCarregado_PAN) then
-		if $(vDataCarregadoSC)>=$(vDataCarregado_ONCO) then
-			let vDataCarregado = $(vDataCarregadoSC);
-		ELSE 
-			if $(vDataCarregado_ONCO) > $(vDataCarregado_PAN) then
-				let vDataCarregado = $(vDataCarregado_ONCO);
-			else 
-				let vDataCarregado = $(vDataCarregado_PAN);
-			end if
-		end if
-	ELSE 
-		if $(vDataCarregado_PAN) > $(vDataCarregado_ONCO) then
-			let vDataCarregado = $(vDataCarregado_PAN);
-		else 
-			let vDataCarregado = $(vDataCarregado_ONCO);
-		end if
-	end if
-	
-	/// verificando se est�o todos no mesmo m�s
-	if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_PAN)) then
-		if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_ONCO)) then
-			if monthname($(vDataCarregado_PAN))=monthname($(vDataCarregado_ONCO)) then
-				// OK, est� certo, continue.
-				TRACE DATAS NO MESMO M�S FISCAL.;
-			ELSE 
-				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
-			end if
-			
-		else 
-				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
-		end if
-	ELSe 
-				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
-	end if
-	
+	// pegando o datacarregado
+	call main.data_base;
 	
 	// INICIO
 	//-------------
@@ -240,8 +180,8 @@ sub dimensao.compradores
 	/// adaptando ao codigo do app
 	DIM_COMPRADOR:
 		LOAD Distinct
-			 CHAVE_COMPRADOR as [Key Comprador Marca Subsort],
-	//	     COD_F as CODF_COMPRADOR,
+			// CHAVE_COMPRADOR as [Key Comprador Marca Subsort],
+		     COD_F as COD_SUBSORTIMENTO,
 	//	     REGIAO_COMPRADOR,
 		     UPPER(COMPRADOR) AS COMPRADOR,
 		     upper(GERENTE_CATEGORIA) as GERENCIA
@@ -264,13 +204,13 @@ sub dimensao.fornecedores.materiais
 	DIM_MATERIAIS:
 	LOAD 
 		COD_MATERIAL&'-'&DES_CD_M AS [Key Cod Mat CD],
-		num(right(COD_MATERIAL,6),0) as  COD_SAP, 	
+		num(right(COD_MATERIAL,6),0) as COD_MATERIAL_SAP,// COD_SAP, 	
 		DES_CD_M as DES_CD,
-		COD_FORNECEDOR_PFAT as COD_SUBSORTIMENTO,	
+		COD_FORNECEDOR_PFAT,// as COD_SUBSORTIMENTO,	
 	 	COD_BAND_GMR,
 	 	DES_BAND_GMR,
-	 	DES_BAND_FORNECEDOR as DES_FORNECEDOR,
-	 	Pacote as CATEGORIA_PRODUTO,
+	 	DES_BAND_FORNECEDOR,// as DES_FORNECEDOR,
+	 	Pacote, // as CATEGORIA_PRODUTO,
 	    COD_ORIGEM&' - '&DES_ORIGEM AS DES_ORIGEM
 	 FROM
 	[$(vr.dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
@@ -279,8 +219,8 @@ sub dimensao.fornecedores.materiais
 	
 	left join (DIM_MATERIAIS)
 	LOAD 
-		num(right(COD_MATERIAL_SAPa,6),0) as  COD_SAP, 	
-	     ULT_COD_SCRUZ as COD_MATERIAL_PFAT, 
+		num(right(COD_MATERIAL_SAPa,6),0) as COD_MATERIAL_SAP,// COD_SAP, 	
+	     ULT_COD_SCRUZ, // as COD_MATERIAL_PFAT, 
 	     COD_EAN_MATERIAL, 
 	     NME_MATERIAL
 	FROM
@@ -297,7 +237,7 @@ sub dimensao.fornecedores.materiais
 	
 	DIM_PRODUTOS_CLOSEUP:
 	LOAD Distinct
-	     ULT_PFAT as COD_MATERIAL_PFAT, 
+	     ULT_PFAT as ULT_COD_SCRUZ,// as COD_MATERIAL_PFAT, 
 	     if(len(trim(MARCA_DESC))=0, ApplyMap('MAP_MARCA',ULT_PFAT,null()),MARCA_DESC) as MARCA_DESC,
 	     MOLECULA_DESC, 
 	     CLASSE_I, 
@@ -381,8 +321,8 @@ sub dimensao.cliente
 	      COD_BANDEIRA_CLIENTE, 
 	      NME_BANDEIRA_CLIENTE, 
 	      NME_SEGMT_CLIENTE,
-	      ApplyMap('mapa_agru',NME_BANDEIRA_CLIENTE,null()) as NME_BANDEIRA_AGRUPADA,
-	      ApplyMap('mapa_assoc',NME_BANDEIRA_CLIENTE,null()) as NME_ASSOCIACAO_BANDEIRA
+	      ApplyMap('mapa_agru',NME_BANDEIRA_CLIENTE,null()) as BANDEIRA_AGRUPADA,
+	      ApplyMap('mapa_assoc',NME_BANDEIRA_CLIENTE,null()) as ASSOCIACAO
 	FROM [$(vr.dimensoes)BW_ESTRUTURA_COMERCIAL.QVD] (qvd)
 	where len(trim(COD_BANDEIRA_CLIENTE))>0;
 	      
