@@ -1,0 +1,63 @@
+//########################################################################################
+// Script que traz o Prazo Compra QVD para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andre Ramos       Data: 05/05/2022
+// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lera acentos.
+//########################################################################################
+
+//####################################
+// Verificando leitura no QVD
+//####################################
+sub prazocompra.carrega_txt (p.Metodo)
+	call TXT.carrega_txt('prazocompra', '$(p.Metodo)');
+end sub
+
+/// QVD LEADTIME
+sub prazocompra.prazocompra (p.ID)
+
+		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
+		let vL.FileNameQVD = 'PRAZO_COMPRAS_$(vCarrega).qvd';
+
+		call fG.FileExists('$(vr.prazocompra)','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 0 THEN 
+			// se nao tiver, pegar do mes anterior
+			let vCarrega = date(
+						 	(num(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									)-1),'YYYYMM');
+		else 			
+			// se tiver, pegar de acordo com o config
+			let vCarrega = date(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									,'YYYYMM');
+
+        
+		end if
+        
+       let vL.FileNameQVD = 'PRAZO_COMPRAS_$(vCarrega).qvd';
+		$(vMetodo)_$(vCarrega):
+		load *
+		from [$(vr.prazocompra)$(vL.FileNameQVD)](qvd);
+
+		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
+			/* For tableIdx = 0 to NoOfTables() - 1
+			Let vTableName = TableName($(tableIdx));
+			Let vPrefix = '$(vMetodo)_';
+			For fieldIdx = 1 to NoOfFields('$(vTableName)')
+				LET vFieldname = FieldName($(fieldIdx), '$(vTableName)');
+				RENAME Field [$(vFieldname)] TO [$(vPrefix)$(vFieldname)];
+			Next fieldIdx
+			Next tableIdx*/
+
+			/// TEMPORARIO - STORE DO QVD VENDAS
+			STORE $(vMetodo)_$(vCarrega) into [QVD\$(vMetodo)_$(vCarrega).qvd](qvd);
+
+			call TXT.gravatxt($(p.ID), 'prazocompra');
+
+end sub

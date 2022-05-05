@@ -31,6 +31,7 @@ sub main.variaveis.ambiente
 		set vr.dimensoes = '$(vr.qvd)5.5.Dimensões\';
 		set vr.vendas = '$(vr.qvd)5.1.Vendas\';
 		set vr.leadtime = '$(vr.qvd)5.9.LeadTime\';
+		set vr.prazocompra = '$(vr.qvd)5.10.Compras\';
 
 	set vr.entradas = '$(vr.raiz)3.Entradas\';
 		set vr.entradas.vendas = '$(vr.entradas)Vendas\';
@@ -56,6 +57,7 @@ sub main.variaveis.ambiente
 	$(Must_Include=..\14.QVS\QVW_Vendas.qvs);
 	$(Must_Include=..\14.QVS\QVW_Leadtime.qvs);
 	$(Must_Include=..\14.QVS\QVW_MapaHistorico.qvs);
+	$(Must_Include=..\14.QVS\QVW_PrazoCompra.qvs);
 	
 	call $(start.caller);
 
@@ -164,7 +166,7 @@ end sub
 //########################################
 
 sub start.mapahistorico
-	call fG.DataTransferValidarPodeProcessar('mapahistorico', 'start.historicoCompleto',0);
+	call fG.DataTransferValidarPodeProcessar('mapahistorico', 'start.mapahistoricoCompleto',0);
 end sub;
 sub start.FimExtratormapahistorico
 	call fG.QvdGeradoPeloExtrator('mapahistorico');
@@ -174,16 +176,29 @@ sub start.mapahistoricoCompleto
 end sub
 
 //########################################
+// PRAZO COMPRA
+//########################################
+
+sub start.prazocompra
+	call fG.DataTransferValidarPodeProcessar('prazocompra', 'start.prazocompraCompleto',0);
+end sub;
+sub start.FimExtratorprazocompra
+	call fG.QvdGeradoPeloExtrator('prazocompra');
+end sub;
+sub start.prazocompraCompleto
+	call prazocompra.carrega_txt('prazocompra');
+end sub
+
+//########################################
 // DIMENSOES
 //########################################
 
 sub start.FimExtratorDimensoes
 	call fG.QvdGeradoPeloExtrator('dimensoes');
-end sub;
-
+end sub
 sub start.dimensoes
 	call fG.DataTransferValidarPodeProcessar('dimensoes', 'start.dimensoesCompleto',1);
-end sub;
+end sub
 sub start.dimensoesCompleto
 	call dimensao.dias.uteis;
 	call dimensao.compradores;
@@ -191,7 +206,6 @@ sub start.dimensoesCompleto
 	call dimensao.estrutura.comercial;
 	call dimensao.cliente;
 end sub
-
 
 //########################################
 // INLINES
