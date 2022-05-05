@@ -8,7 +8,7 @@
 //########################################################################################
 
 sub transforma.vendas.diariobordo
-    let vAnoMesCarregar = year(vDataCarregado)&'01';
+    let vAnoMesCarregar = (year(vDataCarregado)-1)&'01';
 
     for each vEmpresa in 'SC','PAN','ONCO'
 
@@ -25,7 +25,8 @@ sub transforma.vendas.diariobordo
                 LOAD *,
                 //criando chaves
                 NomeEmpresa&'-'&MonthName as CHAVE_DIASUTEIS,
-                
+                year(MonthName) as Ano
+               
 
                 FROM
                 [$(vr.datatransfer.qvd)DIARIOBORDO_VENDAS_$(vEmpresa)_$(vPeriodoBaseCargaIncremental).qvd]

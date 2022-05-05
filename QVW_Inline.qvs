@@ -9,9 +9,9 @@
 sub inline_tab.metricas
     INL_METRICAS:
     LOAD * INLINE [
-        Metricas
-        VB, VB
-        VPF, VPF
+        Aux_Metricas
+        VB
+        VPF
         ];
     call StoreQVD('$(vr.datatransfer.qvd)','INL_METRICAS.qvd','INL_METRICAS',1);
 end sub;

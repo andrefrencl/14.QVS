@@ -181,7 +181,7 @@ sub dimensao.compradores
 	DIM_COMPRADOR:
 		LOAD Distinct
 			// CHAVE_COMPRADOR as [Key Comprador Marca Subsort],
-		     COD_F as COD_SUBSORTIMENTO,
+		     COD_F as COD_FORNECEDOR_PFAT,
 	//	     REGIAO_COMPRADOR,
 		     UPPER(COMPRADOR) AS COMPRADOR,
 		     upper(GERENTE_CATEGORIA) as GERENCIA
@@ -205,7 +205,7 @@ sub dimensao.fornecedores.materiais
 	LOAD 
 		COD_MATERIAL&'-'&DES_CD_M AS [Key Cod Mat CD],
 		num(right(COD_MATERIAL,6),0) as COD_MATERIAL_SAP,// COD_SAP, 	
-		DES_CD_M as DES_CD,
+		//DES_CD_M as DES_CD,
 		COD_FORNECEDOR_PFAT,// as COD_SUBSORTIMENTO,	
 	 	COD_BAND_GMR,
 	 	DES_BAND_GMR,

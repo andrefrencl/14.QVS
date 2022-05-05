@@ -1,0 +1,7 @@
+﻿ID;MARCA;METODO;MONTHS;DATA_ATUALIZAR
+1;PAN;mapahistorico;0;2022-05-05
+2;PAN;mapahistorico;-1;2022-05-05
+3;SC;mapahistorico;0;2022-05-05
+4;SC;mapahistorico;-1;2022-05-05
+5;ONCO;mapahistorico;0;2022-05-05
+6;ONCO;mapahistorico;-1;2022-05-05

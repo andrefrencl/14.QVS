@@ -1,24 +1,24 @@
 //########################################################################################
-// Script que traz as vendas QVD para o Qlik Sense
+// Script que traz o Leadtime QVD para o Qlik Sense
 // Baseado nos extratores do Qlikview
-// Autor: Andre Ramos       Data: 28/04/2022
+// Autor: Andre Ramos       Data: 05/05/2022
 // Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lera acentos.
 //########################################################################################
 
 //####################################
 // Verificando leitura no QVD
 //####################################
-sub vendas.carrega_txt (p.Metodo)
-	call TXT.carrega_txt('vendas', '$(p.Metodo)');
+sub mapahistorico.carrega_txt (p.Metodo)
+	call TXT.carrega_txt('mapahistorico', '$(p.Metodo)');
 end sub
 
-/// QVD VENDAS_Diario_Bordo
-sub vendas.DIARIOBORDO (p.ID)
+/// QVD LEADTIME
+sub mapahistorico.mapahistorico (p.ID)
 
 		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
-		let vL.FileNameQVD = 'Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';
+		let vL.FileNameQVD = '$(vEmpresa)_MAPA_ESTOQUE_HIST_ $(vCarrega).qvd';
 
-		call fG.FileExists('$(vr.vendas)Diario_de_Bordo\','$(vL.FileNameQVD)');
+		call fG.FileExists('$(vr.entradas.mapa)','$(vL.FileNameQVD)');
 		IF $(vG.FileExists)= 0 THEN 
 			// se nao tiver, pegar do mes anterior
 			let vCarrega = date(
@@ -36,11 +36,14 @@ sub vendas.DIARIOBORDO (p.ID)
 									,$(vMonth)
 									)
 									,'YYYYMM');
-		end if
 
-		$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega):
+        
+		end if
+        
+        let vL.FileNameQVD = '$(vEmpresa)_MAPA_ESTOQUE_HIST_ $(vCarrega).qvd';
+		$(vMetodo)_$(vEmpresa)_$(vCarrega):
 		load *
-		from [$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD](qvd);
+		from [$(vr.entradas.mapa)$(vL.FileNameQVD)](qvd);
 
 		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
 			/* For tableIdx = 0 to NoOfTables() - 1
@@ -53,8 +56,8 @@ sub vendas.DIARIOBORDO (p.ID)
 			Next tableIdx*/
 
 			/// TEMPORARIO - STORE DO QVD VENDAS
-			STORE $(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega) into [QVD\$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega).qvd](qvd);
+			STORE $(vMetodo)_$(vEmpresa)_$(vCarrega) into [QVD\$(vMetodo)_$(vEmpresa)_$(vCarrega).qvd](qvd);
 
-			call TXT.gravatxt($(p.ID), 'vendas');
+			call TXT.gravatxt($(p.ID), 'mapahistorico');
 
 end sub

@@ -67,7 +67,7 @@ sub fG.MarqueSemaforo(p.Path,p.FileName,p.Metodo, is_gerado)
   semaforo_$(p.Metodo):
   LOAD
       '$(vL.status)' as status,
-      now() as Data
+      now() as Data      
   AutoGenerate 1;
   call StoreFile('$(p.Path)','$(p.FileName)','semaforo_$(p.Metodo)', 'txt',1);
 end sub;
@@ -75,6 +75,7 @@ end sub;
 sub StoreQVD(p.Path,p.FileName,p.ResidentName,is_Drop)
     call StoreFile('$(p.Path)','$(p.FileName)','$(p.ResidentName)', 'qvd',$(is_Drop));
 end sub;
+
 sub StoreFile(p.Path,p.FileName,p.ResidentName, p.extensionFile, is_Drop)
   trace ---  Iniciou StoreFile;
   trace --- p.Path:$(p.Path), p.FileName: $(p.FileName), p.ResidentName: $(p.ResidentName), p.extensionFile: $(p.extensionFile) ;
@@ -88,5 +89,6 @@ sub StoreFile(p.Path,p.FileName,p.ResidentName, p.extensionFile, is_Drop)
   if $(is_Drop) = 1 then
     drop table $(p.ResidentName);
   endif
+  
 end sub;
 
