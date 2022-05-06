@@ -42,8 +42,23 @@ sub prazocompra.prazocompra (p.ID)
         
        let vL.FileNameQVD = 'PRAZO_COMPRAS_$(vCarrega).qvd';
 		$(vMetodo)_$(vCarrega):
-		load *
-		from [$(vr.prazocompra)$(vL.FileNameQVD)](qvd);
+		load 
+			Marca as NomeEmpresa,
+		    num(UltDtFechada) as %OrderDate,
+		    Material&'-'&CD AS [Key Cod Mat CD],
+			//applymap('mapa_codfprazo',Material&'-'&CD,null()) as COD_FORNECEDOR_PFAT,
+			//Marca&'-'&MonthName(UltDtFechada) as CHAVE_DIASUTEIS,	
+		    CD as DES_CD, 
+		    FATOR_PONDERA, 
+		    sum(PcomVlrContCmpFat) as VLR_PRZ_COMPRA_TOT, 
+		    sum(DestVpfProjMes) as VLR_VPF_PROJETADA, 
+		    sum(DestVlrEstoquePf) as VLR_ESTOQUE_PF
+		from [$(vr.prazocompra)$(vL.FileNameQVD)](qvd)
+		group by 
+			Marca,
+		    UltDtFechada,
+		    Material&'-'&CD,
+		    CD;
 
 		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
 			/* For tableIdx = 0 to NoOfTables() - 1

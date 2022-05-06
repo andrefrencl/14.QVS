@@ -214,6 +214,7 @@ sub start.inlineCompleto
 	call inline_tab.metricas;
 	call inline_tab.vDataCarregado;
 	call inline_tab.marca_logo;
+	call inline_tab.escala;
 end sub
 
 call main.variaveis.ambiente;

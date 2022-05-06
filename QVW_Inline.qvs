@@ -38,3 +38,15 @@ sub inline_tab.marca_logo
         ];
     call StoreQVD('$(vr.datatransfer.qvd)','INL_MARCA_LOGO.qvd','INL_MARCA_LOGO',1);
 end sub
+
+sub inline_tab.escala
+    // CARREGA LOGOS DO GRUPO SC
+    INL_ESCALA:
+    LOAD * INLINE [
+        ESCALA
+        1
+        1000
+        1000000
+        ];
+    call StoreQVD('$(vr.datatransfer.qvd)','INL_ESCALA.qvd','INL_ESCALA',1);
+end sub

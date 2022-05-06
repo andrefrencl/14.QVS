@@ -42,7 +42,21 @@ sub mapahistorico.mapahistorico (p.ID)
         
         let vL.FileNameQVD = '$(vEmpresa)_MAPA_ESTOQUE_HIST_ $(vCarrega).qvd';
 		$(vMetodo)_$(vEmpresa)_$(vCarrega):
-		load *
+		load 
+			if('$(vEmpresa)'='SC','SANTACRUZ',if('$(vEmpresa)'='PAN','PANPHARMA','ONCOPROD')) as NomeEmpresa,
+			num(DATA) as %OrderDate, 
+     		'000000000000'&CODPRO&'-'&CD as [Key Cod Mat CD],
+          	CD as DES_CD, 
+          	STATUS, 
+     		PF as VLR_PRECO_FABRICA, 
+     		QTD_ATUAL as QTD_VENDA_MES_ATUAL , 
+     		MEDIA_POND, 
+     		PREV_VENDA, 
+     		ESTOQUE_LIVRE, 
+     		ESTOQUE_QUAL, 
+     		ESTOQUE_TRANS, 
+     		ESTOQUE_ENTREGA, 
+     		ESTOQUE_TOTAL
 		from [$(vr.entradas.mapa)$(vL.FileNameQVD)](qvd);
 
 		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA

@@ -39,7 +39,19 @@ sub vendas.DIARIOBORDO (p.ID)
 		end if
 
 		$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega):
-		load *
+		load 
+			NomeEmpresa, 
+			[Key Cod Mat CD], 
+			num(date(MonthName)) as %OrderDate, 
+			DES_CD, TIPOVENDA,	IDENT_FORNECEDOR, TIPO_OPERACAO_VENDAS, 
+			
+			// metricas
+			VB, VB_DEVOL, VPF, QTD,	Desconto, 		// VENDSA
+			TOTAL_CONTABIL_PV, TOTAL_PONDERADO_PV,  // PRAZO VENDA
+			CMV, VLR_COM_REBATE, 					// CMV
+			QTD_ESTOQUE, VLR_ESTOQUE_PF, 			// ESTOQUE
+			VLR_VPF_PROJETADA, VLR_VPF_3MESES, VLR_VPF_ESTOQUE_LIVRE	//NS
+
 		from [$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD](qvd);
 
 		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
