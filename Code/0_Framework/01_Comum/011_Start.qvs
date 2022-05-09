@@ -1,0 +1,13 @@
+sub Framework.start
+        call Framework.cabecalho;
+        call framework.loadcontainer.map('shared.container.map');
+        call framework.loadproduct.map('product.map','100');
+        call Framework.GetPaths;
+   
+        // call Includ.index('$(pathsCode.FrameworkTools)','');
+        // call Includ.index('$(pathsCode.Frameworkprocess)','');
+        // call Includ.index('$(pathsCode.MainCode)','index.start');
+        
+        call $(vL.StartFunction);
+
+end sub;

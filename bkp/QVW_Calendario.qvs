@@ -1,0 +1,78 @@
+//########################################################################################
+// Script para montagem do calendario para o Qlik Sense
+// Baseado no codigo do Rob , https://qlikviewcookbook.com/2015/05/better-calendar-scripts/
+// Autor: Andre Ramos       Data: 06/05/2022
+//########################################################################################
+
+sub calendario
+    // script para carregar a data base
+    call main.data_base;
+
+    //variaveis
+    let vAnoBase = year($(vDataCarregado));
+    let vAnoAnterior = year($(vDataCarregado))-1;
+    let vAnoRetrasado = year($(vDataCarregado))-2;
+    let vMesLoop = num(month($(vDataCarregado)));
+    let vDataInicio = num(date(date#('$(vAnoRetrasado)0101','YYYYMMDD')));
+
+    Orders:
+    LOAD * INLINE [
+        OrderDate
+        $(vDataInicio)
+        $(vDataCarregado)
+    ];
+
+    Calendario: 
+
+    load *,
+    if(Year=$(vAnoBase),1,0) as _CY_,
+    if(Year=$(vAnoAnterior),1,0) as _PY_,
+
+    if(Year=$(vAnoBase) and Month_NR<=$(vMesLoop),1,0) as _CYTD_,
+    if(Year=$(vAnoAnterior) and Month_NR<=$(vMesLoop),1,0) as _PYTD_,
+
+    if(Year=$(vAnoBase) and Month_NR=$(vMesLoop),1,0) as _CMonth_,
+    if(Year=$(vAnoAnterior) and Month_NR=$(vMesLoop),1,0) as _PMonth_,
+
+    if(monthstart(%OrderDate)>=monthstart(AddMonths($(vDataCarregado),-2)),1,0) as _CTrim_,
+    if(monthstart(%OrderDate)>=monthstart(AddMonths($(vDataCarregado),-14)) 
+        and monthstart(%OrderDate)<monthstart(AddMonths($(vDataCarregado),-11)),1,0) as _PTrim_,
+
+    if(monthstart(%OrderDate)>=monthstart(AddMonths($(vDataCarregado),-11)),1,0) as _CMath_,
+    if(monthstart(%OrderDate)>=monthstart(AddMonths($(vDataCarregado),-23)) 
+        and monthstart(%OrderDate)<monthstart(AddMonths($(vDataCarregado),-11)),1,0) as _PMath_
+    ;
+
+    Load 
+    num(TempDate) AS %OrderDate, 
+    TempDate as DateFormat,
+    week(TempDate) As Week, 
+    Year(TempDate) As Year, 
+    Month(TempDate) As Month, 
+    num(Month(TempDate)) As Month_NR, 
+    monthname(TempDate) As MonthName, 
+    Day(TempDate) As Day, 
+    'Q' & ceil(month(TempDate) / 3) AS Quarter, 
+    Week(weekstart(TempDate)) & '-' & WeekYear(TempDate) as WeekYear, 
+    WeekDay(TempDate) as WeekDay ,
+    ;
+
+    //=== Generate a temp table of dates === 
+    LOAD 
+    date(mindate + IterNo()) AS TempDate
+    ,maxdate // Used in InYearToDate() above, but not kept 
+    WHILE mindate + IterNo() <= maxdate;
+
+    //=== Get min/max dates from Field ===/
+    LOAD
+    min(FieldValue('OrderDate', recno()))-1 as mindate,
+    max(FieldValue('OrderDate', recno())) as maxdate
+    AUTOGENERATE FieldValueCount('OrderDate');
+
+    drop table Orders;
+    
+    /// TEMPORARIO - STORE DO QVD VENDAS
+    STORE Calendario into [QVD\DIM_CALENDARIO.qvd](qvd);
+    
+
+end sub

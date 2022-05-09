@@ -1,0 +1,52 @@
+//########################################################################################
+// Script para montagem de tabelas "inline" para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andre Ramos       Data: 04/05/2022
+//########################################################################################
+
+
+
+sub inline_tab.metricas
+    INL_METRICAS:
+    LOAD * INLINE [
+        Aux_Metricas
+        VB
+        VPF
+        ];
+    call StoreQVD('$(vr.datatransfer.qvd)','INL_METRICAS.qvd','INL_METRICAS',1);
+end sub;
+
+sub inline_tab.vDataCarregado
+    call main.data_base;
+    INL_DATABASE:
+    load 
+        $(vDataCarregado) as UltimoDiaCarregadoSC
+    autogenerate 1;
+    call StoreQVD('$(vr.datatransfer.qvd)','INL_DATABASE.qvd','INL_DATABASE',1);
+    
+end sub
+
+sub inline_tab.marca_logo
+    // CARREGA LOGOS DO GRUPO SC
+    INL_MARCA_LOGO:
+    LOAD * INLINE [
+        NomeEmpresa, local, ordem
+        SANTACRUZ,  '$(vr.imagens.logos)logo_santa.png',1
+        PANPHARMA,  '$(vr.imagens.logos)logo_Pan.png',2
+        ONCOPROD,   '$(vr.imagens.logos)Logo_Onco.png',3
+        GRUPO,      '$(vr.imagens.logos)logo_Fundo_Grupo.bmp',4
+        ];
+    call StoreQVD('$(vr.datatransfer.qvd)','INL_MARCA_LOGO.qvd','INL_MARCA_LOGO',1);
+end sub
+
+sub inline_tab.escala
+    // CARREGA LOGOS DO GRUPO SC
+    INL_ESCALA:
+    LOAD * INLINE [
+        ESCALA
+        1
+        1000
+        1000000
+        ];
+    call StoreQVD('$(vr.datatransfer.qvd)','INL_ESCALA.qvd','INL_ESCALA',1);
+end sub

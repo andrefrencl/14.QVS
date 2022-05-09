@@ -1,0 +1,15 @@
+
+
+//########################################
+// VENDAS - DIARIO DE BORDO
+//########################################
+
+sub start.vendasdiariobordo
+	call fG.DataTransferValidarPodeProcessar('vendasdiariobordo', 'start.vendasdiariobordoCompleto',0);
+end sub;
+sub start.FimExtratorVendasDiarioBordo
+	call fG.QvdGeradoPeloExtrator('vendasdiariobordo');
+end sub;
+sub start.vendasdiariobordoCompleto
+	call vendas.carrega_txt('vendasdiariobordo');
+end sub

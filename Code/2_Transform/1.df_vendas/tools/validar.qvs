@@ -1,0 +1,32 @@
+
+sub fG.DataTransferValidarPodeProcessar(p.Metodo, p.CallBack, p.PodeInformarQFinalizou)
+  call fG.DataTransferValidarSeTemParaProcessar('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', '$(p.CallBack)', $(p.PodeInformarQFinalizou));
+end sub;
+
+sub fG.DataTransferValidarSeTemParaProcessar(p.Path, p.FileName, p.Metodo, p.CallBack, p.PodeInformarQFinalizou)
+
+  call fG.FileExists('$(p.Path)','$(p.FileName)');
+  if vG.FileExists = 1 then
+    noconcatenate
+    semaforo_$(p.Metodo):
+    first 1 LOAD *
+    from [$(p.Path)$(p.FileName)]
+    (txt, utf8, embedded labels, delimiter is ';', msq)
+    where status = 'QVDGeradoPeloExtrator'
+    ;
+
+
+    if alt(NoOfRows('semaforo_$(p.Metodo)'),0)=0 then
+      trace ## Encerrado - Extrator nao gerou pendencias;
+      drop table semaforo_$(p.Metodo);
+      
+    else 
+      trace --- esta pendente para processar;
+      drop table semaforo_$(p.Metodo);
+      call $(p.CallBack);
+      if $(p.PodeInformarQFinalizou) = 1 then
+        call fG.MarqueSemaforo('$(p.Path)','$(p.FileName)','$(p.Metodo)', 0)
+      endif
+    endif
+  endif
+end sub;

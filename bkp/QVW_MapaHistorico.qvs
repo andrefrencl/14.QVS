@@ -1,0 +1,77 @@
+//########################################################################################
+// Script que traz o Leadtime QVD para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andre Ramos       Data: 05/05/2022
+// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lera acentos.
+//########################################################################################
+
+//####################################
+// Verificando leitura no QVD
+//####################################
+sub mapahistorico.carrega_txt (p.Metodo)
+	call TXT.carrega_txt('mapahistorico', '$(p.Metodo)');
+end sub
+
+/// QVD LEADTIME
+sub mapahistorico.mapahistorico (p.ID)
+
+		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
+		let vL.FileNameQVD = '$(vEmpresa)_MAPA_ESTOQUE_HIST_ $(vCarrega).qvd';
+
+		call fG.FileExists('$(vr.entradas.mapa)','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 0 THEN 
+			// se nao tiver, pegar do mes anterior
+			let vCarrega = date(
+						 	(num(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									)-1),'YYYYMM');
+		else 			
+			// se tiver, pegar de acordo com o config
+			let vCarrega = date(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									,'YYYYMM');
+
+        
+		end if
+        
+        let vL.FileNameQVD = '$(vEmpresa)_MAPA_ESTOQUE_HIST_ $(vCarrega).qvd';
+		$(vMetodo)_$(vEmpresa)_$(vCarrega):
+		load 
+			if('$(vEmpresa)'='SC','SANTACRUZ',if('$(vEmpresa)'='PAN','PANPHARMA','ONCOPROD')) as NomeEmpresa,
+			num(DATA) as %OrderDate, 
+     		'000000000000'&CODPRO&'-'&CD as [Key Cod Mat CD],
+          	CD as DES_CD, 
+          	STATUS, 
+     		PF as VLR_PRECO_FABRICA, 
+     		QTD_ATUAL as QTD_VENDA_MES_ATUAL , 
+     		MEDIA_POND, 
+     		PREV_VENDA, 
+     		ESTOQUE_LIVRE, 
+     		ESTOQUE_QUAL, 
+     		ESTOQUE_TRANS, 
+     		ESTOQUE_ENTREGA, 
+     		ESTOQUE_TOTAL
+		from [$(vr.entradas.mapa)$(vL.FileNameQVD)](qvd);
+
+		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
+			/* For tableIdx = 0 to NoOfTables() - 1
+			Let vTableName = TableName($(tableIdx));
+			Let vPrefix = '$(vMetodo)_';
+			For fieldIdx = 1 to NoOfFields('$(vTableName)')
+				LET vFieldname = FieldName($(fieldIdx), '$(vTableName)');
+				RENAME Field [$(vFieldname)] TO [$(vPrefix)$(vFieldname)];
+			Next fieldIdx
+			Next tableIdx*/
+
+			/// TEMPORARIO - STORE DO QVD VENDAS
+			STORE $(vMetodo)_$(vEmpresa)_$(vCarrega) into [QVD\$(vMetodo)_$(vEmpresa)_$(vCarrega).qvd](qvd);
+
+			call TXT.gravatxt($(p.ID), 'mapahistorico');
+
+end sub

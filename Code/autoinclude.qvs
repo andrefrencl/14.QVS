@@ -1,0 +1,91 @@
+
+sub ScanFolder(Root,scn.tableresident)
+        // trace 'root:$(Root)';
+        for each FileExtension in 'qvs'
+                for each FoundFile in filelist( Root & '\*.' & FileExtension)
+                        // trace 'fonded file';
+                        if  wildmatch(trim(lower('$(FoundFile)')),'*IncludFiles.qvs*','*autoinclude.qvs*') = 0  then
+                                trace $(FoundFile);
+                                Concatenate($(scn.tableresident))
+                                Load
+                                        '$'&'(Include='&'$(FoundFile)'&');' as [//includComand]
+                                Autogenerate 1 ;
+                        endif
+                
+                next FoundFile;
+        next FileExtension;
+        for each SubDirectory in dirlist( Root & '\*' )
+                call ScanFolder(SubDirectory,'$(scn.tableresident)');
+        next SubDirectory;
+end sub;
+
+Sub Includ.ScanIncludOfFolders(scnIncl.tableresident)
+        SET l.lfolderCode = 0;
+        LET l.lfNumRows = Alt(NoOfRows('WorkCode'),-1);
+        if $(l.lfNumRows) >0 then 
+                FOR l.lfolderCode=0 to $(l.lfNumRows)-1
+                        LET l.pathcode = Peek('Path', $(l.lfolderCode), 'WorkCode'); //Peek('ConnectionName',$(RNC));  //
+                        Call ScanFolder('$(l.pathcode)','$(scnIncl.tableresident)') ;
+                NEXT;
+        endif
+
+        LET vl.RowsResid = Alt(NoOfRows('$(WorkCode)'),-1);
+        if $(vl.RowsResid) <> -1 then
+                drop table [$(WorkCode)];  
+        endif
+end sub;
+
+sub Includ.CreateCleanFile(p.PathInclud)
+        noconcatenate
+        ListFileInclude1:
+        Load
+                ' ' as [//includComand]
+        Autogenerate(0);
+
+        STORE ListFileInclude1 Into $(p.PathInclud)IncludFiles.qvs (txt);
+end Sub;
+
+SUB Includ.index(p.PathInclud, p.LastCall)
+        set Qvc.vg.LogLevelMin = 1; 
+        set Qvc.vg.LogLevelMax = 10000000; 
+        set Qvc.vg.LogAtivated = 10;
+        set Qvc.vg.PathLog            = '';
+
+
+        let p.datanow = '';
+        let p.userdomain = '';
+        set Qvc.vg.LogFileNameDD = '';
+        set Qvc.vg.LogFileNameDD2 = '';
+        set Qvc.vg.LogFileName = '';
+        set Qvc.vg.LogCabecalho = '';
+        set vlog.path = '';
+
+
+	let p.ComplementNameFile = Date(Now(), 'YYYY_MM_DD_hh_mm_ss');
+        call Includ.CreateCleanFile('$(p.PathInclud)');
+
+        WorkCode:
+        LOAD * INLINE [Path
+        "$(p.PathInclud)"
+        ];
+
+        call Includ.ScanIncludOfFolders('ListFileInclude1');
+        
+        if len(trim('$(p.LastCall)')) > 0 then
+                Concatenate(ListFileInclude1)
+                Load
+                        'CALL $(p.LastCall);' as [//includComand]
+                Autogenerate(1);
+        endif
+        STORE ListFileInclude1 Into $(p.PathInclud)IncludFiles.qvs (txt);
+
+        drop table ListFileInclude1;
+        
+        drop table WorkCode;
+
+        $(Include=$(p.PathInclud)IncludFiles.qvs);
+end sub;
+
+
+call Includ.index('$(paths.code)00.framework\01.CommonTools\01.default\','Framework.start');
+

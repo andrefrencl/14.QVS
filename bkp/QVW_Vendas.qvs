@@ -1,0 +1,72 @@
+//########################################################################################
+// Script que traz as vendas QVD para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andre Ramos       Data: 28/04/2022
+// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lera acentos.
+//########################################################################################
+
+//####################################
+// Verificando leitura no QVD
+//####################################
+sub vendas.carrega_txt (p.Metodo)
+	call TXT.carrega_txt('vendas', '$(p.Metodo)');
+end sub
+
+/// QVD VENDAS_Diario_Bordo
+sub vendas.DIARIOBORDO (p.ID)
+
+		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
+		let vL.FileNameQVD = 'Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';
+
+		call fG.FileExists('$(vr.vendas)Diario_de_Bordo\','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 0 THEN 
+			// se nao tiver, pegar do mes anterior
+			let vCarrega = date(
+						 	(num(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									)-1),'YYYYMM');
+		else 			
+			// se tiver, pegar de acordo com o config
+			let vCarrega = date(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									,'YYYYMM');
+		end if
+
+		$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega):
+		load 
+			NomeEmpresa, 
+			[Key Cod Mat CD], 
+			num(date(MonthName)) as %OrderDate, 
+			DES_CD, TIPOVENDA,	IDENT_FORNECEDOR, TIPO_OPERACAO_VENDAS, 
+			
+			// metricas
+			VB, VB_DEVOL, VPF, QTD,	Desconto, 		// VENDSA
+			TOTAL_CONTABIL_PV, TOTAL_PONDERADO_PV,  // PRAZO VENDA
+			CMV, VLR_COM_REBATE, 					// CMV
+			QTD_ESTOQUE, VLR_ESTOQUE_PF, 			// ESTOQUE
+			VLR_VPF_PROJETADA, VLR_VPF_3MESES, VLR_VPF_ESTOQUE_LIVRE	//NS
+
+		from [$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD](qvd);
+
+		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
+			/* For tableIdx = 0 to NoOfTables() - 1
+			Let vTableName = TableName($(tableIdx));
+			Let vPrefix = '$(vMetodo)_';
+			For fieldIdx = 1 to NoOfFields('$(vTableName)')
+				LET vFieldname = FieldName($(fieldIdx), '$(vTableName)');
+				RENAME Field [$(vFieldname)] TO [$(vPrefix)$(vFieldname)];
+			Next fieldIdx
+			Next tableIdx*/
+
+			/// TEMPORARIO - STORE DO QVD VENDAS
+			STORE $(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega) into [QVD\$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega).qvd](qvd);
+
+			call TXT.gravatxt($(p.ID), 'vendas');
+
+end sub

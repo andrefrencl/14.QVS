@@ -6,6 +6,24 @@
 //####################################################################e###################
 
 sub main.variaveis.ambiente
+
+	SET ThousandSep='.';
+	SET DecimalSep=',';
+	SET MoneyThousandSep='.';
+	SET MoneyDecimalSep=',';
+	SET MoneyFormat='R$#.##0,00;-R$#.##0,00';
+	SET TimeFormat='hh:mm:ss';
+	SET DateFormat='DD/MM/YYYY';
+	SET TimestampFormat='DD/MM/YYYY hh:mm:ss[.fff]';
+	SET FirstWeekDay=6;
+	SET BrokenWeeks=1;
+	SET ReferenceDay=0;
+	SET FirstMonthOfYear=1;
+	SET CollationLocale='pt-BR';
+	SET MonthNames='jan;fev;mar;abr;mai;jun;jul;ago;set;out;nov;dez';
+	SET LongMonthNames='janeiro;fevereiro;março;abril;maio;junho;julho;agosto;setembro;outubro;novembro;dezembro';
+	SET DayNames='seg;ter;qua;qui;sex;sab;dom';
+	SET LongDayNames='segunda-feira;terça-feira;quarta-feira;quinta-feira;sexta-feira;sábado;domingo';
 	
 	set vr.raiz = '..\';
 
@@ -45,6 +63,89 @@ sub main.variaveis.ambiente
 
 end sub
 
+//####################################################
+// DESCOBRINDO A DATA BASE da CARGA DOS QVDS
+//####################################################
+
+sub main.data_base
+	
+	/////////////////////////////////////////////////
+	//// DATA BASE ATUAL
+	database:
+	LOAD UltimoDiaCarregadoSC
+	FROM
+	[$(vr.dimensoes)DATA_BASE_SANTA.QVD](qvd);
+	Let vDataCarregadoSC = peek('UltimoDiaCarregadoSC',0,'database');
+	drop table database;
+	
+	// PAN
+	database:
+	LOAD UltimoDiaCarregadoPAN
+	FROM [$(vr.dimensoes)DATA_BASE_PAN.QVD](qvd);
+	Let vDataCarregado_PAN = peek('UltimoDiaCarregadoPAN',0,'database');
+	drop table database;
+	
+	// ONCO
+	database:
+	LOAD UltimoDiaCarregadoONCO
+	FROM [$(vr.dimensoes)DATA_BASE_ONCO.QVD](qvd);
+	Let vDataCarregado_ONCO = peek('UltimoDiaCarregadoONCO',0,'database');
+	drop table database;
+	
+	
+	/// vDataCarregado tem que ser pela maior data
+	if $(vDataCarregadoSC)>=$(vDataCarregado_PAN) then
+		if $(vDataCarregadoSC)>=$(vDataCarregado_ONCO) then
+			let vDataCarregado = $(vDataCarregadoSC);
+		ELSE 
+			if $(vDataCarregado_ONCO) > $(vDataCarregado_PAN) then
+				let vDataCarregado = $(vDataCarregado_ONCO);
+			else 
+				let vDataCarregado = $(vDataCarregado_PAN);
+			end if
+		end if
+	ELSE 
+		if $(vDataCarregado_PAN) > $(vDataCarregado_ONCO) then
+			let vDataCarregado = $(vDataCarregado_PAN);
+		else 
+			let vDataCarregado = $(vDataCarregado_ONCO);
+		end if
+	end if
+	
+	/// verificando se estï¿½o todos no mesmo mï¿½s
+	if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_PAN)) then
+		if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_ONCO)) then
+			if monthname($(vDataCarregado_PAN))=monthname($(vDataCarregado_ONCO)) then
+				// OK, estï¿½ certo, continue.
+				TRACE DATAS NO MESMO Mï¿½S FISCAL.;
+			ELSE 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+			end if
+			
+		else 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+		end if
+	ELSe 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+	end if
+
+
+end sub;
+
+
+//########################################
+// VENDAS - DIARIO DE BORDO
+//########################################
+
+sub start.vendasdiariobordo
+	call fG.DataTransferValidarPodeProcessar('vendasdiariobordo', 'start.vendasdiariobordoCompleto',0);
+end sub;
+sub start.FimExtratorVendasDiarioBordo
+	call fG.QvdGeradoPeloExtrator('vendasdiariobordo');
+end sub;
+sub start.vendasdiariobordoCompleto
+	call vendas.carrega_txt('vendasdiariobordo');
+end sub
 
 //########################################
 // LEADTIME

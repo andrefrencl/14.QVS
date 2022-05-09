@@ -1,0 +1,69 @@
+
+//####################################################
+// DESCOBRINDO A DATA BASE da CARGA DOS QVDS
+//####################################################
+
+sub vendas.data_base
+	
+	/////////////////////////////////////////////////
+	//// DATA BASE ATUAL
+	database:
+	LOAD UltimoDiaCarregadoSC
+	FROM
+	[$(vr.dimensoes)DATA_BASE_SANTA.QVD](qvd);
+	Let vDataCarregadoSC = peek('UltimoDiaCarregadoSC',0,'database');
+	drop table database;
+	
+	// PAN
+	database:
+	LOAD UltimoDiaCarregadoPAN
+	FROM [$(vr.dimensoes)DATA_BASE_PAN.QVD](qvd);
+	Let vDataCarregado_PAN = peek('UltimoDiaCarregadoPAN',0,'database');
+	drop table database;
+	
+	// ONCO
+	database:
+	LOAD UltimoDiaCarregadoONCO
+	FROM [$(vr.dimensoes)DATA_BASE_ONCO.QVD](qvd);
+	Let vDataCarregado_ONCO = peek('UltimoDiaCarregadoONCO',0,'database');
+	drop table database;
+	
+	
+	/// vDataCarregado tem que ser pela maior data
+	if $(vDataCarregadoSC)>=$(vDataCarregado_PAN) then
+		if $(vDataCarregadoSC)>=$(vDataCarregado_ONCO) then
+			let vDataCarregado = $(vDataCarregadoSC);
+		ELSE 
+			if $(vDataCarregado_ONCO) > $(vDataCarregado_PAN) then
+				let vDataCarregado = $(vDataCarregado_ONCO);
+			else 
+				let vDataCarregado = $(vDataCarregado_PAN);
+			end if
+		end if
+	ELSE 
+		if $(vDataCarregado_PAN) > $(vDataCarregado_ONCO) then
+			let vDataCarregado = $(vDataCarregado_PAN);
+		else 
+			let vDataCarregado = $(vDataCarregado_ONCO);
+		end if
+	end if
+	
+	/// verificando se estÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¿Ãƒâ€šÃ‚Â½o todos no mesmo mÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¿Ãƒâ€šÃ‚Â½s
+	if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_PAN)) then
+		if monthname($(vDataCarregadoSC))=monthname($(vDataCarregado_ONCO)) then
+			if monthname($(vDataCarregado_PAN))=monthname($(vDataCarregado_ONCO)) then
+				// OK, estÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¿Ãƒâ€šÃ‚Â½ certo, continue.
+				TRACE DATAS NO MESMO MÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¿Ãƒâ€šÃ‚Â½S FISCAL.;
+			ELSE 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+			end if
+			
+		else 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+		end if
+	ELSe 
+				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
+	end if
+
+
+end sub;

@@ -1,0 +1,17 @@
+
+sub fG.FileExists(Path,FileName)
+
+      TRACE Inicio - fG.FileExists;
+			let vG.FileSize = FileSize('$(Path)$(FileName)');
+      set vG.FileExists = 0;
+      set vG.FileExists.StrReturn = 'Arquivo na existe: $(FileName)';
+			if len(vG.FileSize)>0 then
+          set vG.FileExists = 1;
+          set vG.FileExists.StrReturn = 'Arquivo existe: $(FileName)';
+      endif
+      trace --- Arquivo:$(Path)$(FileName);
+      Trace --- Existe (0/1): $(vG.FileExists);
+      Trace --- FileSize: $(vG.FileSize);
+      Trace --- Retorno: $(vG.FileExists.StrReturn);
+      
+end sub;

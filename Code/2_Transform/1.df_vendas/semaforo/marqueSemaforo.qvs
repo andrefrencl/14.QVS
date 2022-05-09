@@ -1,0 +1,23 @@
+
+sub fG.MarqueSemaforo(p.Path,p.FileName,p.Metodo, is_gerado)
+  /*
+    marcar como gerado qvd
+    marcar como processodo
+  */
+  trace --- Iniciou fG.MarqueSemaforo;
+  trace --- p.Path: $(p.Path),p.FileName: $(p.FileName),p.Metodo: $(p.Metodo),is_gerado: $(is_gerado);
+  set vL.status = 'QVDGeradoPeloExtrator';
+  if $(is_gerado) = 0 then
+    set vL.status = 'DataTransferProcessou';
+  endif 
+
+  noconcatenate
+  semaforo_$(p.Metodo):
+  LOAD
+      '$(vL.status)' as status,
+      now() as Data      
+  AutoGenerate 1;
+  call StoreFile('$(p.Path)','$(p.FileName)','semaforo_$(p.Metodo)', 'txt',1);
+end sub;
+
+

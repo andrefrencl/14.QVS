@@ -1,0 +1,75 @@
+//########################################################################################
+// Script para leitura de TXT de parametro de carga mensais para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andre Ramos       Data: 28/04/2022
+// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lera acentos.
+//########################################################################################
+
+
+sub TXT.carrega_txt(p.tipoqvd, p.Metodo)
+    // p.tipoqvd = referencia ao qvd que será carregado = vendas, leadtime, etc que está no nome do txt.
+      // p.metodo = referencia ao nome da tabela e semaforo
+
+	//lendo configuracoes de venda
+	let vHoje = num(date(today()));
+
+	temp:
+	first 1
+	LOAD ID, 
+		MARCA,
+		METODO, 
+		MONTHS, 
+		date(date#(DATA_ATUALIZAR,'YYYY-MM-DD'),'YYYYMM') as ANOMES
+	FROM
+	[$(vr.qvs.txt)config_$(p.tipoqvd).txt]
+	(txt, utf8, embedded labels, delimiter is ';', msq)
+	where num(date(date#(DATA_ATUALIZAR,'YYYY-MM-DD')))<=$(vHoje);
+	
+	if NoOfRows('temp')=0 then
+		trace ## Encerrado - Nao ha $(p.tipoqvd) $(p.Metodo) para atualizar;
+		call fG.MarqueSemaforo('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', 0);
+
+	else 
+
+		let vID      = peek('ID',0,'temp');
+		let vEmpresa = peek('MARCA',0,'temp');
+		let vMetodo  = peek('METODO',0,'temp');
+		let vMonth   = peek('MONTHS',0,'temp');
+		let vAnoMes  = peek('ANOMES',0,'temp');
+
+		drop table temp;
+				trace -- Tipo: $(p.tipoqvd) - vID: $(vID) - vEmpresa: $(vEmpresa) - vMetodo: $(vMetodo) - vMonth: $(vMonth) - vAnoMes: $(vAnoMes);		
+
+		call $(p.tipoqvd).$(vMetodo)(vID);	
+
+	end if
+
+end sub
+
+sub TXT.gravatxt (ID_temp, p.tipoqvd)
+
+	// TODOS DO TXT
+	temp:
+	LOAD *
+	FROM
+	[$(vr.qvs.txt)config_$(p.tipoqvd).txt]
+	(txt, utf8, embedded labels, delimiter is ';', msq)
+	where ID<>$(ID_temp);
+
+	// LINHA ATUAL
+	Concatenate(temp)
+	LOAD 
+		ID, MARCA, METODO, MONTHS, 
+		date($(vHoje)+1,'YYYY-MM-DD') as DATA_ATUALIZAR
+	FROM
+	[$(vr.qvs.txt)config_$(p.tipoqvd).txt]
+	(txt, utf8, embedded labels, delimiter is ';', msq)
+	where ID=$(ID_temp);
+	
+	Store temp into [$(vr.qvs.txt)config_$(p.tipoqvd).txt](txt, delimiter is ';');
+	drop table temp;
+	
+end sub
+
+
+

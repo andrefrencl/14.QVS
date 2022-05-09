@@ -1,0 +1,76 @@
+//########################################################################################
+// Script que traz o Leadtime QVD para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andre Ramos       Data: 05/05/2022
+// Os arquivos QVS devem ser salvos no sistema de arquivo ANSI, senao nao lera acentos.
+//########################################################################################
+
+//####################################
+// Verificando leitura no QVD
+//####################################
+sub leadtime.carrega_txt (p.Metodo)
+	call TXT.carrega_txt('leadtime', '$(p.Metodo)');
+end sub
+
+/// QVD LEADTIME
+sub leadtime.LEADTIME (p.ID)
+
+		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
+		let vL.FileNameQVD = 'LEADTIME_$(vEmpresa)_$(vCarrega).qvd';
+
+		call fG.FileExists('$(vr.leadtime)','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 0 THEN 
+			// se nao tiver, pegar do mes anterior
+			let vCarrega = date(
+						 	(num(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									)-1),'YYYYMM');
+		else 			
+			// se tiver, pegar de acordo com o config
+			let vCarrega = date(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									,'YYYYMM');
+
+        
+		end if
+        
+        let vL.FileNameQVD = 'LEADTIME_$(vEmpresa)_$(vCarrega).qvd';
+		$(vMetodo)_$(vEmpresa)_$(vCarrega):
+		load 
+		     '$(vGrupo)' as CODIGO_EMPRESA,
+		     SUBSORTIMENTO,
+			 DES_CD, 
+		     ID_LEADTIME, 
+			 num(date(date#(CALMONTH,'YYYYMM'))) as DATA_LEADTIME,  
+//			     DIA as DATA_DIA_LEADTIME,
+		     VLR_NF_LT_EXTERNO, 
+		     VLR_POND_FATURA_ENTREGA, 
+		     VLR_POND_PEDIDO_FATURA,
+		     VLR_NF_INTERNO, 
+		     VLR_POND_TEMPO_LIBERACAO,
+		     VLR_POND_ES_DESTINO
+		
+		from [$(vr.leadtime)$(vL.FileNameQVD)](qvd);
+
+		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
+			/* For tableIdx = 0 to NoOfTables() - 1
+			Let vTableName = TableName($(tableIdx));
+			Let vPrefix = '$(vMetodo)_';
+			For fieldIdx = 1 to NoOfFields('$(vTableName)')
+				LET vFieldname = FieldName($(fieldIdx), '$(vTableName)');
+				RENAME Field [$(vFieldname)] TO [$(vPrefix)$(vFieldname)];
+			Next fieldIdx
+			Next tableIdx*/
+
+			/// TEMPORARIO - STORE DO QVD VENDAS
+			STORE $(vMetodo)_$(vEmpresa)_$(vCarrega) into [QVD\$(vMetodo)_$(vEmpresa)_$(vCarrega).qvd](qvd);
+
+			call TXT.gravatxt($(p.ID), 'leadtime');
+
+end sub

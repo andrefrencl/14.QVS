@@ -1,0 +1,9 @@
+PathContainerVariableName, PathContainerValue, processType
+ex_01datalake, 01.extractors\01.DataLake, extract
+ex_02dbmaria, 01.extractors\02.DBMaria, extract
+tr_01common, 02.CommonTransforms\01.common, transform
+tr_03documents, 02.CommonTransforms\03.Documents, transform
+tr_04person, 02.CommonTransforms\04.Person, transform
+tr_10questionnaire, 02.CommonTransforms\10.Questionnaire, transform
+tr_11operations, 02.CommonTransforms\11.Operations, transform
+tr_12product, 02.CommonTransforms\12.Product, transform

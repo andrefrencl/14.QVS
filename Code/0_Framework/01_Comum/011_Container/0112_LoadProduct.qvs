@@ -1,0 +1,28 @@
+sub framework.loadproduct.map(p.FileCSVName,p.ClientCode)
+
+    containersPaths:
+    LOAD
+        PathContainerVariableName,
+        PathContainerValue,
+        ClientCode
+    FROM [$(pathsCode.frameworkdefault)containersPaths/$(p.FileCSVName).csv]
+    (txt, codepage is 28591, embedded labels, delimiter is ',', msq)
+    where ClientCode = '$(p.ClientCode)';
+
+    
+    let vL.To_Loop = alt(NoOfRows('containersPaths'),0);
+    trace 'rows containersPaths';
+
+	for vL.From_Loop = 0 to vL.To_Loop-1
+        let vL.Paths.ContainerVariableName = peek('PathContainerVariableName', $(vL.From_Loop),'containersPaths');
+        let vL.Paths.ContainerValue = peek('PathContainerValue',$(vL.From_Loop),'containersPaths');
+        let vL.Paths.ContainerClientCode = peek('ClientCode',$(vL.From_Loop),'containersPaths');
+
+        let pathsCode.MainCode_$(vL.Paths.ContainerVariableName) = '$(paths.code)$(vL.Paths.ContainerValue)';
+        set paths.SubFolderQVDload_$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))/04.load/qvd/';
+        trace 'paths.SubFolderQVDload_$(vL.Paths.ContainerVariableName)';
+        trace '$(paths.SubFolderQVDload_$(vL.Paths.ContainerVariableName))';
+	next
+
+drop table containersPaths;
+end sub;
