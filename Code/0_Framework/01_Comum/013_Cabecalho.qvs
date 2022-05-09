@@ -16,9 +16,9 @@ sub Framework.cabecalho
 	SET FirstMonthOfYear=1;
 	SET CollationLocale='pt-BR';
 	SET MonthNames='jan;fev;mar;abr;mai;jun;jul;ago;set;out;nov;dez';
-	SET LongMonthNames='janeiro;fevereiro;marÃƒÂ§o;abril;maio;junho;julho;agosto;setembro;outubro;novembro;dezembro';
+	SET LongMonthNames='janeiro;fevereiro;mar�o;abril;maio;junho;julho;agosto;setembro;outubro;novembro;dezembro';
 	SET DayNames='seg;ter;qua;qui;sex;sab;dom';
-	SET LongDayNames='segunda-feira;terÃƒÂ§a-feira;quarta-feira;quinta-feira;sexta-feira;sÃƒÂ¡bado;domingo';
+	SET LongDayNames='segunda-feira;ter�a-feira;quarta-feira;quinta-feira;sexta-feira;s�bado;domingo';
     SET NumericalAbbreviation='3:k;6:M;9:G;12:T;15:P;18:E;21:Z;24:Y;-3:m;-6:ÃƒÆ’Ã…Â½Ãƒâ€šÃ‚Â¼;-9:n;-12:p;-15:f;-18:a;-21:z;-24:y';
     SET CreateSearchIndexOnReload=1;
 

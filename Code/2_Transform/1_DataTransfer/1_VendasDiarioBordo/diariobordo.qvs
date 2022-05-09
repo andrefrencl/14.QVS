@@ -11,5 +11,5 @@ sub start.FimExtratorVendasDiarioBordo
 	call fG.QvdGeradoPeloExtrator('vendasdiariobordo');
 end sub;
 sub start.vendasdiariobordoCompleto
-	call vendas.carrega_txt('vendasdiariobordo');
+	call TXT.carrega_txt('vendas','vendasdiariobordo');
 end sub

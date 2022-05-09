@@ -3,10 +3,11 @@
 // DESCOBRINDO A DATA BASE da CARGA DOS QVDS
 //####################################################
 
-sub vendas.data_base
+sub vendas.data_base(p.QueroCalendario,p.PathToStore,p.FileName)
 	
 	/////////////////////////////////////////////////
 	//// DATA BASE ATUAL
+	
 	database:
 	LOAD UltimoDiaCarregadoSC
 	FROM
@@ -65,5 +66,23 @@ sub vendas.data_base
 				let vDataCarregado = rangemin($(vDataCarregadoSC),$(vDataCarregado_PAN),$(vDataCarregado_ONCO));
 	end if
 
+	if $(p.QueroCalendario) = 1 then
+  		let vDataInicio = num(date(date#((year(vDataCarregado)-2)&'0101','YYYYMMDD')));
+
+				noconcatenate
+				Orders:
+				LOAD * INLINE [
+					%OrderDate
+					$(vDataInicio)
+					$(vDataCarregado)
+				];
+			call default.mastercalendar_Resident('Orders', '%OrderDate', 'db'); // vai gerar uma tabela: MasterCalendarOrders
+
+			drop table Orders;
+			if len(trim('$(p.PathToStore)'))>2 then
+					call StoreQVD('$(p.PathToStore)','$(p.FileName)','MasterCalendarOrders',1);
+			endif
+
+	endif
 
 end sub;

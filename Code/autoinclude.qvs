@@ -1,4 +1,9 @@
 
+
+let pathsCode.frameworkdefault = '$(paths.code)0_Framework\01_Comum\';
+let pathsCode.MainCode = '$(paths.code)$(pathsCode.ContainerAtual)';
+
+
 sub ScanFolder(Root,scn.tableresident)
         // trace 'root:$(Root)';
         for each FileExtension in 'qvs'
@@ -87,5 +92,4 @@ SUB Includ.index(p.PathInclud, p.LastCall)
 end sub;
 
 
-call Includ.index('$(paths.code)00.framework\01.CommonTools\01.default\','Framework.start');
-
+call Includ.index('$(pathsCode.frameworkdefault)','Framework.start');

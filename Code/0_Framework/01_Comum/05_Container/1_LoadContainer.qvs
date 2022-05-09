@@ -5,7 +5,7 @@ sub framework.loadcontainer.map(p.FileCSVName)
         PathContainerVariableName,
         PathContainerValue,
         processType
-    FROM [$(pathsCode.frameworkdefault)containersPaths/$(p.FileCSVName).csv]
+    FROM [$(pathsCode.frameworkdefault)05_Container\$(p.FileCSVName).csv]
     (txt, codepage is 28591, embedded labels, delimiter is ',', msq);
 
     
@@ -29,6 +29,6 @@ sub framework.loadcontainer.map(p.FileCSVName)
 
 	next
 
+    drop table containersPaths;
 
-drop table containersPaths;
 end sub;

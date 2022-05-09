@@ -4,12 +4,12 @@ sub framework.weekday
     DiasSemana:
         load    * Inline [
         a, b, c
-        'seg', '2ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº', 1
-        'ter', '3ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº', 2
-        'qua', '4ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº', 3
-        'qui', '5ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº', 4
-        'sex', '6ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº', 5
-        'sÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡b', 'Sa', 6
+        'seg', '2�', 1
+        'ter', '3�', 2
+        'qua', '4�', 3
+        'qui', '5�', 4
+        'sex', '6�', 5
+        's�b', 'Sa', 6
         'dom', 'Do', 7 ];
 
         MAP_DiaSemanaAbrev:
@@ -37,9 +37,17 @@ sub default.mastercalendar.PathQVD(p.fullPathFileQVD, p.DateFieldName, p.apelido
         call default.mastercalendar_Resident('maxmin', '$(p.DateFieldName)', '$(p.apelido)');
 end sub;
 
+
 /*
-    call default.mastercalendar_Resident('database', 'data', 'db')
-    call default.mastercalendar_Resident('dimensoes', 'dt_pedido', 'dim')
+    let vDataInicio = num(date(date#('$(vAnoRetrasado)0101','YYYYMMDD')));
+    Orders:
+    LOAD * INLINE [
+        OrderDate
+        $(vDataInicio)
+        $(vDataCarregado)
+    ];
+    call default.mastercalendar_Resident('Orders', 'OrderDate', 'db')
+    call default.mastercalendar_Resident('dimensoes', '%orderdate', 'dim')
 */
 sub default.mastercalendar_Resident(p.residentname, p.DateFieldName, p.apelido)
 

@@ -1,0 +1,7 @@
+sub index.vendas
+
+  //call vendas.database(1,'');
+  
+ call start.vendasdiariobordo
+
+end sub;

@@ -1,0 +1,11 @@
+﻿//includComand
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\011_Start.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\012_Paths.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\013_Cabecalho.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\02_files\files.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\03_store\store.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\04_Calendar\MasterCalendar.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\05_Container\1_LoadContainer.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\05_Container\2_LoadProduct.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\06_CarregaTXT\QVW_CarregaTXT_Datas.qvs);
+CALL Framework.start;

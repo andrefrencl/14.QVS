@@ -1,6 +1,0 @@
-sub index.vendas
-
- call vendas.database;
-  call start.vendasdiariobordo
-
-end sub;

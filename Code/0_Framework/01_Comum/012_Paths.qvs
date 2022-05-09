@@ -4,15 +4,9 @@ sub Framework.GetPaths
                 
         let conf.todayvar             = Today(2);
         trace #################################;
-
-        
-        
-        set paths.SubFolderQVDExtract = '$(paths.code)$(paths.Container)/01.extract/qvd/';
-        set paths.SubFolderQVDTransform = '$(paths.code)$(paths.Container)/02.transform/qvd/';
-        set paths.SubFolderQVDTransformFinal = '$(paths.code)$(paths.Container)/03.transformfinal/qvd/';
-        set paths.SubFolderQVDload = '$(paths.code)$(paths.Container)/04.load/qvd/';
-
-        set paths.SubFolderQVDload = '$(paths.code)$(paths.Container)/04.load/qvd/';
+        // set paths.SubFolderQVDExtract = '$(paths.code)$(paths.Container)/1_Extract/qvd/';
+        // set paths.SubFolderQVDTransform = '$(paths.code)$(paths.Container)/2_Transform/qvd/';
+        // set paths.SubFolderQVDload = '$(paths.code)$(paths.Container)/3_load/qvd/';
         trace #################################;
 
 end sub;

@@ -1,0 +1,9 @@
+﻿//includComand
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\0_index_vendas.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\diariobordo.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\semaforo\marqueSemaforo.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\semaforo\validarSePodeProcessar.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\tools\database.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\tools\validar.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\tools\validarSePodeProcessar.qvs);
+CALL index.vendas;

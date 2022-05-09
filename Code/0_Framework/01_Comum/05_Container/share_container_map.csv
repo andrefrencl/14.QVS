@@ -1,0 +1,3 @@
+PathContainerVariableName, PathContainerValue, processType
+ex_01datalake, 01.extractors\01_DataLake, extract
+tr_1_df_vendas, 1_df_vendas, transform

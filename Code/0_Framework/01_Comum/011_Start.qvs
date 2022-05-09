@@ -1,13 +1,14 @@
 sub Framework.start
         call Framework.cabecalho;
-        call framework.loadcontainer.map('shared.container.map');
-        call framework.loadproduct.map('product.map','100');
+        call framework.loadcontainer.map('share_container_map');
+        call framework.loadproduct.map('product_map');
         call Framework.GetPaths;
-   
+        
+        
         // call Includ.index('$(pathsCode.FrameworkTools)','');
         // call Includ.index('$(pathsCode.Frameworkprocess)','');
-        // call Includ.index('$(pathsCode.MainCode)','index.start');
-        
-        call $(vL.StartFunction);
+        call Includ.index('$(pathsCode.MainCode)','$(vL.StartFunction)');
+
+        // call $(vL.StartFunction);
 
 end sub;
