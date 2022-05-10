@@ -1,0 +1,161 @@
+//########################################################################################
+// Script para montar a Fato do Diario de Bordo para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andre Ramos       Data: 04/05/2022
+//########################################################################################
+// DEPENDENCIAS:    PRAZO_COMPRAS_<YYYYMM>.qvd
+//                  <empresa>_MAPA_ESTOQUE_HIST_ <YYYYMM>.qvd
+//                  LEADTIME_<empresa>_<YYYYMM>
+//########################################################################################
+
+sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
+
+	Mapping
+    mapa_codf:
+    LOAD 
+		COD_MATERIAL&'-'&DES_CD_M AS [Key Cod Mat CD],
+		COD_FORNECEDOR_PFAT
+	 FROM
+	[$(vr.dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
+	where len(trim(COD_FORNECEDOR_PFAT))>0;
+
+    // CARREGANDO VENDAS
+       
+        $(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes):
+        load 
+			NomeEmpresa, 
+			[Key Cod Mat CD], 
+			num(date(MonthName)) as %OrderDate, 
+			DES_CD, TIPOVENDA,	IDENT_FORNECEDOR, TIPO_OPERACAO_VENDAS, 
+            applymap('mapa_codf', [Key Cod Mat CD], null()) as COD_FORNECEDOR_PFAT,
+			
+			// metricas
+			VB, VB_DEVOL, VPF, QTD,	Desconto, 		// VENDSA
+			TOTAL_CONTABIL_PV, TOTAL_PONDERADO_PV,  // PRAZO VENDA
+			CMV, VLR_COM_REBATE, 					// CMV
+			QTD_ESTOQUE, VLR_ESTOQUE_PF, 			// ESTOQUE
+			VLR_VPF_PROJETADA, VLR_VPF_3MESES, VLR_VPF_ESTOQUE_LIVRE	//NS
+		from [$(vr.vendas)Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(p.CarregaMes)_$(p.Empresa).QVD](qvd);
+               
+    
+    // PRAZO DE COMPRAS
+	let vL.FileNameQVD = 'PRAZO_COMPRAS_$(p.CarregaMes).qvd';
+	call fG.FileExists('$(vr.prazocompra)','$(vL.FileNameQVD)');
+	IF $(vG.FileExists)= 1 THEN 
+
+		Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)
+		load 
+			Marca as NomeEmpresa,
+		    num(UltDtFechada) as %OrderDate,
+		    Material&'-'&CD AS [Key Cod Mat CD],
+			applymap('mapa_codf',Material&'-'&CD,null()) as COD_FORNECEDOR_PFAT,
+		    CD as DES_CD, 
+		    sum(PcomVlrPrazoCompraPon)  as PC_FATOR_PONDERA, 
+		    sum(PcomVlrContCmpFat)      as PC_VLR_PRZ_COMPRA_TOT, 
+		    sum(DestVpfProjMes)         as DE_VLR_VPF_PROJETADA, 
+		    sum(DestVlrEstoquePf)       as DE_VLR_ESTOQUE_PF
+
+		from [$(vr.prazocompra)$(vL.FileNameQVD)](qvd)
+		group by 
+			Marca,
+		    UltDtFechada,
+		    Material&'-'&CD,
+		    CD;
+
+    else
+        // se nao existir, adicione campo zerado
+		Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)        
+        load
+			if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) 
+                                            as NomeEmpresa,
+		        $(vDataCarregado)           as %OrderDate,
+		        '' AS [Key Cod Mat CD],
+                '' as DES_CD,
+                '' as COD_FORNECEDOR_PFAT,
+                0 as PC_FATOR_PONDERA, 
+                0 as PC_VLR_PRZ_COMPRA_TOT, 
+                0 as DE_VLR_VPF_PROJETADA, 
+                0 as DE_VLR_ESTOQUE_PF
+            autogenerate 1;
+
+    end if
+
+    
+    /// adicionando MAPA HISTORICO
+		let vL.FileNameQVD = '$(p.Empresa)_MAPA_ESTOQUE_HIST_ $(p.CarregaMes).qvd';
+		call fG.FileExists('$(vr.entradas.mapa)','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 1 THEN 
+            Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)
+            load
+                if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) 
+                                                as NomeEmpresa,
+                num(DATA)                       as %OrderDate, 
+                '000000000000'&CODPRO&'-'&CD    as [Key Cod Mat CD],
+                CD                              as DES_CD, 
+                applymap('mapa_codf','000000000000'&CODPRO&'-'&CD, null()) 
+                                                as COD_FORNECEDOR_PFAT,
+                (PF*ESTOQUE_LIVRE) as MAPA_VLR_ESTOQUELIVRE, 
+                (PF*ESTOQUE_TOTAL) as MAPA_VLR_ESTOQUETOTAL, 
+                (PF*MEDIA_POND)    as MAPA_VLR_MEDIAPOND
+            from [$(vr.entradas.mapa)$(vL.FileNameQVD)](qvd);
+        else
+            // se nao existir, adicione campo zerado
+            Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)        
+            load
+                if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) 
+                                                as NomeEmpresa,
+                    $(vDataCarregado)           as %OrderDate,
+                    '' AS [Key Cod Mat CD],
+                    '' as DES_CD,
+                    '' as COD_FORNECEDOR_PFAT,
+                    0 as MAPA_VLR_ESTOQUELIVRE, 
+                    0 as MAPA_VLR_ESTOQUETOTAL ,
+                    0 as MAPA_VLR_MEDIAPOND
+                autogenerate 1;
+        
+        end if
+
+
+    /// adicionando LEAD TIME
+		let vL.FileNameQVD = 'LEADTIME_$(p.Empresa)_$(p.CarregaMes).qvd';
+		call fG.FileExists('$(vr.leadtime)','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 1 THEN 
+
+            Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)
+            load 
+                if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) 
+                                                    as NomeEmpresa,
+                num(date(date#(CALMONTH,'YYYYMM'))) as %OrderDate,  
+                DES_CD, 
+                SUBSORTIMENTO                       as COD_FORNECEDOR_PFAT,
+                ID_LEADTIME, 
+                
+                VLR_NF_LT_EXTERNO                   as [Valor Liq. NF BRL],  
+                VLR_POND_FATURA_ENTREGA             as [Pond. Fat ate Entrega],  
+                VLR_POND_PEDIDO_FATURA              as [Pond. Ped ate Fat],
+                VLR_NF_INTERNO                      as [Valor Liq. NF BRL Interno],  
+                (VLR_POND_TEMPO_LIBERACAO+VLR_POND_ES_DESTINO) 
+                                                    as [Pond. Interno]            
+            from [$(vr.leadtime)$(vL.FileNameQVD)](qvd);
+
+        else
+
+            // se nao existir, adicione campo zerado
+            Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)        
+            load
+                if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) 
+                                                as NomeEmpresa,
+                    $(vDataCarregado)           as %OrderDate,
+                    '' AS [Key Cod Mat CD],
+                    '' as DES_CD,
+                    '' as ID_LEADTIME,
+                    0  as [Valor Liq. NF BRL],  
+                    0  as [Pond. Fat ate Entrega],  
+                    0  as [Pond. Ped ate Fat],
+                    0  as [Valor Liq. NF BRL Interno],  
+                    0  as [Pond. Interno]            
+                autogenerate 1;
+
+        end if
+
+end sub
