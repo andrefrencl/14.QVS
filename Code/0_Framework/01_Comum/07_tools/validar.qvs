@@ -1,3 +1,7 @@
+sub fG.QvdGeradoPeloExtrator(p.Metodo)
+  call fG.MarqueSemaforo('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', 1);
+end sub;
+
 sub fG.DataTransferValidarPodeProcessar(p.Metodo, p.CallBack, p.PodeInformarQFinalizou)
   call fG.DataTransferValidarSeTemParaProcessar('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', '$(p.CallBack)', $(p.PodeInformarQFinalizou));
 end sub;

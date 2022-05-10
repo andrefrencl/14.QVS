@@ -40,7 +40,7 @@ sub TXT.carrega_txt(p.tipoqvd, p.Metodo)
 		drop table temp;
 				trace -- Tipo: $(p.tipoqvd) - vID: $(vID) - vEmpresa: $(vEmpresa) - vMetodo: $(vMetodo) - vMonth: $(vMonth) - vAnoMes: $(vAnoMes);		
 
-		call $(p.tipoqvd).$(vMetodo)(vID);	
+		call $(p.tipoqvd).$(vMetodo)($(vID));	
 
 	end if
 

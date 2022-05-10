@@ -1,0 +1,5 @@
+﻿//includComand
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\2_Dimensoes\0_index_dimensoes.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\2_Dimensoes\QVW_DimCalendario.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\2_Dimensoes\QVW_Dimensoes.qvs);
+CALL index.dimensao.calendario;

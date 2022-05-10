@@ -4,170 +4,17 @@
 // Autor: Andre Ramos       Data: 28/04/2022
 //########################################################################################
 
-sub dimensao.dias.uteis
-
-	Trace *************************************************************************;
-	Trace DIM_DIAS_UTEIS ;
-	Trace *************************************************************************;
-	
-	// pegando o datacarregado
-	call main.data_base;
-	
-	// INICIO
-	//-------------
-	LET vMesLoop = num(MONTH(vDataCarregado));
-	let vMesAno = monthname(vDataCarregado);
-	
-	///////////////////////////////////////////////////
-	//// script para carregar para saber data do dia util conforme DIAS_UTEIS__VARIAVEIS
-	//// considerando feriados
-	FeriadosBrasil:
-	LOAD
-	Concat(Date("FERIADOS",'DD/MM/YYYY'),';') as Feriados
-	FROM
-	[$(vr.entradas.vendas)feriados.xlsx]
-	(ooxml, embedded labels, table is Plan1);
-	//Declara��o da variav� que recebera os feriados
-	LET strFeriados = Chr(39) & Replace(Peek('Feriados',0,'FeriadosBrasil'),';',Chr(39) & ',' & Chr(39)) & Chr(39);
-	// comando: =LastWorkDate(MonthStart(vData),$(vQtd),$(strFeriados))
-	// esse $(vQtd) vem do VAR_DIAS_UTEIS 
-	drop table FeriadosBrasil;
-	
-	//////////////////////////////////////////
-	for emp = 1 to 3
-	                  
-		if emp=1 then
-			let vEmpresa = 'SANTA';
-			let vNomeEmpresa = 'SANTACRUZ';
-		end if                        
-		if emp=2 then
-			let vEmpresa = 'PAN';
-			let vNomeEmpresa = 'PANPHARMA';
-		end if
-		if emp=3 then
-			let vEmpresa = 'ONCO';
-			let vNomeEmpresa = 'ONCOPROD';
-		end if
-		
-	////////////////////////////////////////////   
-	if vEmpresa='SANTA' then      
-	      let datacompara = vDataCarregadoSC;
-	      if num(month($(vDataCarregadoSC)),0) = $(vMesLoop) then
-	      	let vMesCerto = 1;
-	      else 
-	      	let vMesCerto = 0;
-	      end if
-	else 
-	      let datacompara = vDataCarregado_$(vEmpresa);
-	      if num(month($(vDataCarregado_$(vEmpresa))),0) = $(vMesLoop) then
-	      	let vMesCerto = 1;
-	      else 
-	      	let vMesCerto = 0;
-	      end if      
-	end if
-	
-	Dias:
-	LOAD 
-	      '$(vNomeEmpresa)' as EMPRESA,
-	      MonthName(Date#(DTA_ANOMES_DIAUTIL,'YYYYMM')) as MonthName,
-	//    num(date(Date#(DTA_ANOMES_DIAUTIL,'YYYYMM'))) as DATA,
-	    QTD_DIAS_UTEIS_MES, 
-	    QTD_DIAS_UTEIS_VARIAVEL
-	FROM
-	[$(vr.dimensoes)BW_DIAS_UTEIS_$(vEmpresa).qvd](qvd)
-	//[$(vr.dimensoes)BW_DIAS_UTEIS_SANTA.qvd](qvd)
-	where year(Date#(DTA_ANOMES_DIAUTIL,'YYYYMM')) = year('$(datacompara)');
-	
-	TESTEDIA:
-	load
-	     QTD_DIAS_UTEIS_VARIAVEL as Var, 
-	     QTD_DIAS_UTEIS_MES as VarM
-	Resident Dias
-	where  MonthName = '$(vMesAno)';
-	LET vQtd = peek('Var',0,'TESTEDIA');
-	LET vQtdMes = peek('VarM',0,'TESTEDIA');
-	drop table TESTEDIA;
-	
-	Let vUtilData_$(vEmpresa) = NetWorkDays(MonthStart(datacompara),datacompara,$(strFeriados));
-	let utildatacompara = vUtilData_$(vEmpresa);
-	
-	if vQtd <> utildatacompara then
-	if vQtd <= 0 and vMesCerto=0 then
-		let utildatacompara = 0;
-	end if 	
-	      
-	      /////////////////////////////////////////////////////////////////
-	      /// precisa atualizar tabela DIAS_UTEIS que est� errado!
-	      DiasNovo:
-	      load
-		            EMPRESA as x,
-	           MonthName as a, 
-	           QTD_DIAS_UTEIS_MES as b,  
-	           QTD_DIAS_UTEIS_VARIAVEL as c
-	     Resident Dias
-	      where MonthName <> '$(vMesAno)';
-	      Drop table Dias;
-	
-	      Dias:
-	      load
-	            x as EMPRESA1,
-	           a as MonthName1, 
-	           b as QTD_DIAS_UTEIS_MES1,  
-	           c as QTD_DIAS_UTEIS_VARIAVEL1
-	     Resident DiasNovo
-	     order by a asc;
-	     
-	      drop table DiasNovo;
-	
-		
-	
-	      // criando novo mes atual     
-	      LOAD col0 as EMPRESA1, Date#(col1,'MMM YYYY') as MonthName1, col2 as QTD_DIAS_UTEIS_VARIAVEL1, col3 as QTD_DIAS_UTEIS_MES1
-	      INLINE [
-	          col0, col1, col2, col3
-	          $(vNomeEmpresa), $(vMesAno), $(utildatacompara), $(vQtdMes)
-	        ];
-	
-	
-	            /// Montando tabela
-	            TAB_DIASUTEIS:
-	            load
-	                  EMPRESA1 as EMPRESA,
-	                  MonthName1 as MonthName,
-	                  EMPRESA1&'-'&MonthName1 as CHAVE_DIASUTEIS,
-	                  QTD_DIAS_UTEIS_MES1 as QTD_DIAS_UTEIS_MES,
-	                  QTD_DIAS_UTEIS_VARIAVEL1 as QTD_DIAS_UTEIS_VARIAVEL
-	            Resident Dias;
-	            drop table Dias;
-	
-        else 
-        
-        /// Montando tabela
-        TAB_DIASUTEIS:
-        load
-            EMPRESA,
-            MonthName,
-            EMPRESA&'-'&MonthName as CHAVE_DIASUTEIS,
-            QTD_DIAS_UTEIS_MES,
-            QTD_DIAS_UTEIS_VARIAVEL
-        Resident Dias;
-        drop table Dias;
-        
-        end if
-
-    NEXT
-
-    NoConcatenate
-    DIM_DIAS_UTEIS:
-    load
-        CHAVE_DIASUTEIS,
-        QTD_DIAS_UTEIS_MES as UTEIS_MES,
-        QTD_DIAS_UTEIS_VARIAVEL as UTEIS_VAR
-    Resident TAB_DIASUTEIS
-    where MonthName = '$(vMesAno)';
-    drop table TAB_DIASUTEIS;
-
-
+sub start.FimExtratorDimensoes
+	call fG.QvdGeradoPeloExtrator('dimensoes');
+end sub
+sub start.dimensoes
+	call fG.DataTransferValidarPodeProcessar('dimensoes', 'start.dimensoesCompleto',1);
+end sub
+sub start.dimensoesCompleto
+	call dimensao.compradores;
+	call dimensao.fornecedores.materiais;
+	call dimensao.estrutura.comercial;
+	call dimensao.cliente;
 end sub
 
 sub dimensao.compradores
@@ -206,7 +53,7 @@ sub dimensao.fornecedores.materiais
 		COD_MATERIAL&'-'&DES_CD_M AS [Key Cod Mat CD],
 		num(right(COD_MATERIAL,6),0) as COD_MATERIAL_SAP,// COD_SAP, 	
 		//DES_CD_M as DES_CD,
-		COD_FORNECEDOR_PFAT,// as COD_SUBSORTIMENTO,	
+		//COD_FORNECEDOR_PFAT,// as COD_SUBSORTIMENTO,	
 	 	COD_BAND_GMR,
 	 	DES_BAND_GMR,
 	 	DES_BAND_FORNECEDOR,// as DES_FORNECEDOR,

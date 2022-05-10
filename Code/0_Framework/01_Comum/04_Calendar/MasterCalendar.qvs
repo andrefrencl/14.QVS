@@ -25,6 +25,7 @@ sub framework.weekday
 
 end sub;
 
+/*
 sub default.mastercalendar.PathQVD(p.fullPathFileQVD, p.DateFieldName, p.apelido, p.format,p.keyField)
     
         noconcatenate
@@ -36,7 +37,7 @@ sub default.mastercalendar.PathQVD(p.fullPathFileQVD, p.DateFieldName, p.apelido
                     ;
         call default.mastercalendar_Resident('maxmin', '$(p.DateFieldName)', '$(p.apelido)');
 end sub;
-
+*/
 
 /*
     let vDataInicio = num(date(date#('$(vAnoRetrasado)0101','YYYYMMDD')));
@@ -44,65 +45,132 @@ end sub;
     LOAD * INLINE [
         OrderDate
         $(vDataInicio)
-        $(vDataCarregado)
+        maxdate
     ];
     call default.mastercalendar_Resident('Orders', 'OrderDate', 'db')
-    call default.mastercalendar_Resident('dimensoes', '%orderdate', 'dim')
+    call default.mastercalendar_Resident('dimensoes', 'TempDate', 'dim')
 */
 sub default.mastercalendar_Resident(p.residentname, p.DateFieldName, p.apelido)
 
+/*
     LET vl.mxmin = Alt(NoOfRows('$(p.residentname)'),-1);
     
     if $(vl.mxmin) <> 1 then 
         load '$(p.fullPathFileQVD)' as filename
         from ERRORNOPROCESSOMASTERCALENDAR(qvd);
     endif 
+*/
+
+    noconcatenate
+       maxmin:
+       load distinct   
+            Min($(p.DateFieldName))	as	mindate,
+            Max($(p.DateFieldName))	as	maxdate
+       Resident $(p.residentname);
+
     call framework.weekday;
 
     noconcatenate
     MasterCalendar$(p.apelido):
         load    
-        TempDate 		                                                                                as [$(p.DateFieldName)],
-        week(TempDate) 	                                                                                as [Week $(p.apelido)],
-        Year(TempDate) 	                                                                                as [Year $(p.apelido)],
-        Month(TempDate)	                                                                                as [Month $(p.apelido)],
-        Num(Month(TempDate),'00') 	                                                                    as [Month Number $(p.apelido)],
-        Day(TempDate) 		                                                                            as [Day $(p.apelido)],
-        Year(TempDate) & '-' & Num(Month(TempDate),'00')                                                as [Year - Month Number $(p.apelido)],
-        Right(Text(Year(TempDate)),2) & '-' & Num(Month(TempDate),'00')                                 as [Year - Month Name $(p.apelido)],
-        'S' & ceil(month(TempDate) / 6)                                                                 AS [Semester $(p.apelido)],
-        Year(TempDate) & '-S' & ceil(month(TempDate) / 6)                                               as [Year Semester $(p.apelido)],
-        'T' & ceil(month(TempDate) / 3)                                                                 AS [Quarter $(p.apelido)],
-        Week(weekstart(TempDate)) & '-' & WeekYear(TempDate)                                            as [Week of Year $(p.apelido)],
-        WeekDay(TempDate) 	                                                                            as [Day of Week $(p.apelido)],
-        ApplyMap('MAP_DiaSemanaAbrev',text(WeekDay([TempDate])),'nd')                                   as [Day Of Week Name $(p.apelido)],
-        ApplyMap('MAP_DiaSemanaOrdem',text(WeekDay([TempDate])),7)                                      as [Day of Week Order $(p.apelido)],
-        Num(Day(TempDate),'00') & '-' & ApplyMap('MAP_DiaSemanaAbrev',text(WeekDay([TempDate])),'nd')   as [Day of Week Number $(p.apelido)],
+        num(TempDate)	                                                    as [$(p.DateFieldName)],
+        monthname(TempDate)                                                 as [MonthName_$(p.apelido)],
+        week(TempDate)                                                      as [Week_$(p.apelido)],
+        Year(TempDate)                                                      as [Year_$(p.apelido)],
+        Month(TempDate)                                                     as [Month_$(p.apelido)],
+        Num(Month(TempDate),'00')                                           as [Month_Number_$(p.apelido)],
+        Day(TempDate)                                                       as [Day_$(p.apelido)],
+    //    Year(TempDate) & '-' & Num(Month(TempDate),'00')                                                as [Year - Month Number $(p.apelido)],
+    //    Right(Text(Year(TempDate)),2) & '-' & Num(Month(TempDate),'00')                                 as [Year - Month Name $(p.apelido)],
+        'S' & ceil(month(TempDate) / 6)                                     AS [Semester_$(p.apelido)],
+    //    Year(TempDate) & '-S' & ceil(month(TempDate) / 6)                                               as [Year Semester $(p.apelido)],
+        'Q' & ceil(month(TempDate) / 3)                                     AS [Quarter_$(p.apelido)],
+        Week(weekstart(TempDate)) & '-' & WeekYear(TempDate)                as [Week_of_Year_$(p.apelido)],
+        WeekDay(TempDate) 	                                                as [Day_of_Week_$(p.apelido)],
+        ApplyMap('MAP_DiaSemanaAbrev',text(WeekDay([TempDate])),'nd')       as [Day_of_Week_Name_$(p.apelido)],
+        //ApplyMap('MAP_DiaSemanaOrdem',text(WeekDay([TempDate])),7)          as [Day of Week Order $(p.apelido)],
+        //Num(Day(TempDate),'00') & '-' & ApplyMap('MAP_DiaSemanaAbrev'
+        //    ,text(WeekDay([TempDate])),'nd')   as [Day of Week Number $(p.apelido)],
 
-        If( Date(TempDate)>= (Date('$(conf.todayvar)')-7) 
-            and Date(TempDate)<= (Date('$(conf.todayvar)')) , 1, 0)	                                    as [Is Last 7 Day $(p.apelido)],
+        If( TempDate = maxdate, 1, 0)                           as [_CToday_$(p.apelido)],
 
-        If( Date(TempDate)>= (Date('$(conf.todayvar)')-30) 
-            and Date(TempDate)<= (Date('$(conf.todayvar)'))  , 1, 0)	                                as [Is Last 30 Day $(p.apelido)],
+        If( TempDate>= (maxdate-7) 
+            //and TempDate<= (maxdate) 
+                , 1, 0)                                                     as [_C7Day_$(p.apelido)],
 
-        If( DayNumberOfYear(Date(TempDate)) <= DayNumberOfYear(Date('$(conf.todayvar)')) , 1,0 ) 		as [Is In YTD $(p.apelido)],
-        If( year(Date(TempDate)) = year(Date('$(conf.todayvar)'))
-                ,'Is Current  Year','IsNOT Current Year')                                               as [Is Current Year $(p.apelido)],
+        If( TempDate>= (maxdate-30) 
+            //and TempDate<= (maxdate)  
+            , 1, 0)	                                                        as [_C30Day_$(p.apelido)],
 
-        If( DayNumberOfQuarter(Date(TempDate)) <= DayNumberOfQuarter(Date('$(conf.todayvar)')), 1, 0)   as [Is In QTD $(p.apelido)],
 
-        If( Month(Date(TempDate)) = Month(Date('$(conf.todayvar)')) 
-            and year(Date(TempDate)) = year(Date('$(conf.todayvar)')),1,0)                              as [Is Current Of Year Month $(p.apelido)],
-        If( Month(Date(TempDate)) = Month(Date('$(conf.todayvar)')),1,0)                                as [Is Current Month $(p.apelido)],
-        If( WeekYear(Date(TempDate)) = WeekYear(Date('$(conf.todayvar)')) 
-                and year(Date(TempDate)) = year(Date('$(conf.todayvar)')), 1, 0)                        as [Is Current week $(p.apelido)],
-        If( Date(TempDate) = Date('$(conf.todayvar)'), 1, 0) 				                            as [Is Today $(p.apelido)],
+        If( Month(TempDate) = Month(maxdate) 
+            and year(TempDate) = year(maxdate),1,0)                         as [_CMonth_$(p.apelido)],
 
-        If( Month(Date(TempDate)) = month(addmonths(Date('$(conf.todayvar)'), -1))  
-            and year(Date(TempDate)) = year(addmonths(Date('$(conf.todayvar)'), -1)) ,1,0)              as [Is Last Month $(p.apelido)],
-        If( Year(Date(TempDate)) = year(addyears(Date('$(conf.todayvar)'), -1)) 
-            or Year(Date(TempDate)) = year(Date('$(conf.todayvar)'))  ,1,0)                             as [Is Last Two Years $(p.apelido)],
-        If( Year(Date(TempDate)) = year(addyears(Date('$(conf.todayvar)'), -1)),1,0)                    as [Is Last Year $(p.apelido)]
+        If( Month(TempDate) = Month(maxdate)
+                and year(TempDate) = (year(maxdate)-1),1,0)                 as [_PMonth_$(p.apelido)],
+
+        If( year(TempDate) = year(maxdate)
+                //,'Is Current  Year','IsNOT Current Year')
+                ,1,0)                                                       as [_CY_$(p.apelido)],
+
+        If( year(TempDate) = year(maxdate)
+                //,'Is Current  Year','IsNOT Current Year')
+                ,1,0)                                                       as [_CYtd_$(p.apelido)],
+
+        If( year(TempDate) = year(maxdate) and
+                num(month(TempDate)) < num(month(maxdate))
+                //,'Is Current  Year','IsNOT Current Year')
+                ,1,0)                                                       as [_CYtdFechado_$(p.apelido)],
+
+        If( year(TempDate) = (year(maxdate)-1)
+                //,'Is Current  Year','IsNOT Current Year')
+                ,1,0)                                                       as [_PY_$(p.apelido)],
+
+        If( year(TempDate) = (year(maxdate)-1) and
+                num(month(TempDate)) <= num(month(maxdate))
+                //,'Is Current  Year','IsNOT Current Year')
+                ,1,0)                                                       as [_PYtd_$(p.apelido)],
+
+        If( year(TempDate) = (year(maxdate)-1) and
+                num(month(TempDate)) < num(month(maxdate))
+                //,'Is Current  Year','IsNOT Current Year')
+                ,1,0)                                                       as [_PYtdFechado_$(p.apelido)],
+
+        If( TempDate >= monthstart(addmonths(maxdate, -2))
+                                                                ,1,0)       as [_CTrim_$(p.apelido)],
+
+        if( monthstart(TempDate)>=monthstart(AddMonths(maxdate,-14)) 
+            and monthstart(TempDate)<monthstart(AddMonths(maxdate,-11))
+                                                                ,1,0)       as [_PTrim_$(p.apelido)],
+
+        If( TempDate >= monthstart(addmonths(maxdate, -5)),1,0)             as [_CSem_$(p.apelido)],
+
+        if(monthstart(TempDate)>=monthstart(AddMonths(maxdate,-17)) 
+            and monthstart(TempDate)<monthstart(AddMonths(maxdate,-11))
+                                                                ,1,0)       as [_PSem_$(p.apelido)],
+
+        if(monthstart(TempDate)>=monthstart(AddMonths(maxdate,-11)),1,0)    as [_CMath_$(p.apelido)],
+
+        if(monthstart(TempDate)>=monthstart(AddMonths(maxdate,-23)) 
+            and monthstart(TempDate)<monthstart(AddMonths(maxdate,-11))
+                                                                    ,1,0)   as [_PMath_$(p.apelido)],
+
+/*
+        If( DayNumberOfYear(TempDate) <= DayNumberOfYear(maxdate) , 1,0 ) 		as [Is In YTD $(p.apelido)],
+
+        //If( DayNumberOfQuarter(TempDate) <= DayNumberOfQuarter(maxdate), 1, 0)   as [Is In QTD $(p.apelido)],
+        
+        If( WeekYear(TempDate) = WeekYear(maxdate) 
+                //and year(TempDate) = year(maxdate), 1, 0)                        as [Is Current week $(p.apelido)],
+
+
+        If( Month(TempDate) = month(addmonths(maxdate, -1))  
+            and year(TempDate) = year(addmonths(maxdate, -1)) ,1,0)              as [Is Last Month $(p.apelido)],
+            
+        If( Year(TempDate) = year(addyears(maxdate, -1)) 
+            or Year(TempDate) = year(maxdate)  ,1,0)                             as [Is Last Two Years $(p.apelido)],
+        If( Year(TempDate) = year(addyears(maxdate, -1)),1,0)                    as [Is Last Year $(p.apelido)]
+*/        
         ;
         load    
             date(mindate + IterNo()) AS TempDate
@@ -111,7 +179,7 @@ sub default.mastercalendar_Resident(p.residentname, p.DateFieldName, p.apelido)
             load distinct   
                         mindate-1 as mindate,
                         maxdate
-            Resident $(p.residentname);
+            Resident maxmin;//$(p.residentname);
 
         drop table maxmin;
 end sub;

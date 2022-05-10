@@ -80,7 +80,7 @@ sub main.data_base(p.QueroCalendario,p.PathToStore,p.FileName)
 
 			drop table Orders;
 			if len(trim('$(p.PathToStore)'))>2 then
-					call StoreQVD('$(p.PathToStore)','$(p.FileName)','MasterCalendarOrders',1);
+					call StoreQVD('$(p.PathToStore)','DIM_CALENDARIO.qvd','MasterCalendardb',1);
 			endif
 
 	endif

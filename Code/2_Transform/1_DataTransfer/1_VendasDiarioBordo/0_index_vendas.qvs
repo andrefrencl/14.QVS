@@ -1,7 +1,7 @@
-sub index.vendas
-
-  //call vendas.database(1,'');
-  
+sub index.vendasdiariobordo
  call start.vendasdiariobordo
+end sub;
 
+sub index.semaforodiariobordo
+ call start.FimExtratorVendasDiarioBordo
 end sub;

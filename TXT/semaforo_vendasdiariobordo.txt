@@ -1,2 +1,2 @@
 ﻿status;Data
-QVDGeradoPeloExtrator;06/05/2022 09:02:56
+QVDGeradoPeloExtrator;10/05/2022 10:48:23
