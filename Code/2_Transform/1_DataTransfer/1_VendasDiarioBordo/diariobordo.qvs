@@ -19,7 +19,7 @@ sub vendasdiariobordo.DIARIOBORDO (p.ID)
 		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
 		let vL.FileNameQVD = 'Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';
 
-		call fG.FileExists('$(vr.vendas)Diario_de_Bordo\','$(vL.FileNameQVD)');
+		call fG.FileExists('$(paths.QVDExtract.ex_vendasdiariodebordo)','$(vL.FileNameQVD)');
 		IF $(vG.FileExists)= 0 THEN 
 			// se nao tiver, pegar do mes anterior
 			let vCarrega = date(

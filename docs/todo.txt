@@ -1,0 +1,12 @@
+extract 
+   bd
+
+
+
+
+1) extrair dados 
+
+
+2) transform
+   2.1) transformar dados
+   2.2) DataTransfer

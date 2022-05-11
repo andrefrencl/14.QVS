@@ -11,21 +11,21 @@ sub main.data_base(p.QueroCalendario,p.PathToStore,p.FileName)
 	database:
 	LOAD UltimoDiaCarregadoSC
 	FROM
-	[$(vr.dimensoes)DATA_BASE_SANTA.QVD](qvd);
+	[$(paths.QVDExtract.ex_dimensoes)DATA_BASE_SANTA.QVD](qvd);
 	Let vDataCarregadoSC = peek('UltimoDiaCarregadoSC',0,'database');
 	drop table database;
 	
 	// PAN
 	database:
 	LOAD UltimoDiaCarregadoPAN
-	FROM [$(vr.dimensoes)DATA_BASE_PAN.QVD](qvd);
+	FROM [$(paths.QVDExtract.ex_dimensoes)DATA_BASE_PAN.QVD](qvd);
 	Let vDataCarregado_PAN = peek('UltimoDiaCarregadoPAN',0,'database');
 	drop table database;
 	
 	// ONCO
 	database:
 	LOAD UltimoDiaCarregadoONCO
-	FROM [$(vr.dimensoes)DATA_BASE_ONCO.QVD](qvd);
+	FROM [$(paths.QVDExtract.ex_dimensoes)DATA_BASE_ONCO.QVD](qvd);
 	Let vDataCarregado_ONCO = peek('UltimoDiaCarregadoONCO',0,'database');
 	drop table database;
 	
@@ -157,8 +157,8 @@ sub main.dias.uteis
 	    QTD_DIAS_UTEIS_MES, 
 	    QTD_DIAS_UTEIS_VARIAVEL
 	FROM
-	[$(vr.dimensoes)BW_DIAS_UTEIS_$(vEmpresa).qvd](qvd)
-	//[$(vr.dimensoes)BW_DIAS_UTEIS_SANTA.qvd](qvd)
+	[$(paths.QVDExtract.ex_dimensoes)BW_DIAS_UTEIS_$(vEmpresa).qvd](qvd)
+	//[$(paths.QVDExtract.ex_dimensoes)BW_DIAS_UTEIS_SANTA.qvd](qvd)
 	where year(Date#(DTA_ANOMES_DIAUTIL,'YYYYMM')) = year('$(datacompara)');
 	
 	TESTEDIA:

@@ -28,8 +28,7 @@ sub main.variaveis.ambiente
 	set vr.raiz = '..\';
 
 	set vr.qvd = '$(vr.raiz)5.QVDs\';	
-		set vr.dimensoes = '$(vr.qvd)5.5.Dimensões\';
-		set vr.vendas = '$(vr.qvd)5.1.Vendas\';
+		
 		set vr.leadtime = '$(vr.qvd)5.9.LeadTime\';
 		set vr.prazocompra = '$(vr.qvd)5.10.Compras\';
 
@@ -74,21 +73,21 @@ sub main.data_base
 	database:
 	LOAD UltimoDiaCarregadoSC
 	FROM
-	[$(vr.dimensoes)DATA_BASE_SANTA.QVD](qvd);
+	[$(paths.QVDExtract.ex_dimensoes)DATA_BASE_SANTA.QVD](qvd);
 	Let vDataCarregadoSC = peek('UltimoDiaCarregadoSC',0,'database');
 	drop table database;
 	
 	// PAN
 	database:
 	LOAD UltimoDiaCarregadoPAN
-	FROM [$(vr.dimensoes)DATA_BASE_PAN.QVD](qvd);
+	FROM [$(paths.QVDExtract.ex_dimensoes)DATA_BASE_PAN.QVD](qvd);
 	Let vDataCarregado_PAN = peek('UltimoDiaCarregadoPAN',0,'database');
 	drop table database;
 	
 	// ONCO
 	database:
 	LOAD UltimoDiaCarregadoONCO
-	FROM [$(vr.dimensoes)DATA_BASE_ONCO.QVD](qvd);
+	FROM [$(paths.QVDExtract.ex_dimensoes)DATA_BASE_ONCO.QVD](qvd);
 	Let vDataCarregado_ONCO = peek('UltimoDiaCarregadoONCO',0,'database');
 	drop table database;
 	

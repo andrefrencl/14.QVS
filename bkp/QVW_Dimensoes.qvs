@@ -74,8 +74,8 @@ sub dimensao.dias.uteis
 	    QTD_DIAS_UTEIS_MES, 
 	    QTD_DIAS_UTEIS_VARIAVEL
 	FROM
-	[$(vr.dimensoes)BW_DIAS_UTEIS_$(vEmpresa).qvd](qvd)
-	//[$(vr.dimensoes)BW_DIAS_UTEIS_SANTA.qvd](qvd)
+	[$(paths.QVDExtract.ex_dimensoes)BW_DIAS_UTEIS_$(vEmpresa).qvd](qvd)
+	//[$(paths.QVDExtract.ex_dimensoes)BW_DIAS_UTEIS_SANTA.qvd](qvd)
 	where year(Date#(DTA_ANOMES_DIAUTIL,'YYYYMM')) = year('$(datacompara)');
 	
 	TESTEDIA:
@@ -213,7 +213,7 @@ sub dimensao.fornecedores.materiais
 	 	Pacote, // as CATEGORIA_PRODUTO,
 	    COD_ORIGEM&' - '&DES_ORIGEM AS DES_ORIGEM
 	 FROM
-	[$(vr.dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
+	[$(paths.QVDExtract.ex_dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
 	where len(trim(DES_CD_M))>0 or len(trim(COD_MATERIAL))>0;
 	
 	
@@ -224,7 +224,7 @@ sub dimensao.fornecedores.materiais
 	     COD_EAN_MATERIAL, 
 	     NME_MATERIAL
 	FROM
-	[$(vr.dimensoes)BW_MATERIAL.QVD]
+	[$(paths.QVDExtract.ex_dimensoes)BW_MATERIAL.QVD]
 	(qvd)
 	where len(trim(COD_MATERIAL_SAPa))>0;
 	
@@ -270,7 +270,7 @@ sub dimensao.estrutura.comercial
 	      NME_REGIAO, 
 	      NME_SUPERVISOR, 
 	      NME_SETOR
-	FROM [$(vr.dimensoes)BW_ESTRUTURA_COMERCIAL.QVD] (qvd)
+	FROM [$(paths.QVDExtract.ex_dimensoes)BW_ESTRUTURA_COMERCIAL.QVD] (qvd)
 	where len(trim(NME_GRV))>0;
 
 end sub
@@ -323,7 +323,7 @@ sub dimensao.cliente
 	      NME_SEGMT_CLIENTE,
 	      ApplyMap('mapa_agru',NME_BANDEIRA_CLIENTE,null()) as BANDEIRA_AGRUPADA,
 	      ApplyMap('mapa_assoc',NME_BANDEIRA_CLIENTE,null()) as ASSOCIACAO
-	FROM [$(vr.dimensoes)BW_ESTRUTURA_COMERCIAL.QVD] (qvd)
+	FROM [$(paths.QVDExtract.ex_dimensoes)BW_ESTRUTURA_COMERCIAL.QVD] (qvd)
 	where len(trim(COD_BANDEIRA_CLIENTE))>0;
 	      
 	
@@ -341,7 +341,7 @@ sub dimensao.cliente
 	     NME_UF_CLIENTE,
 	     DES_GRUPO_CLIENTE 
 	//     COD_CLIENTE_PFAT
-	FROM [$(vr.dimensoes)BW_Customer.QVD] (qvd)
+	FROM [$(paths.QVDExtract.ex_dimensoes)BW_Customer.QVD] (qvd)
 	where len(trim(COD_CLIENTE_SAP))>0;
 	
 end sub

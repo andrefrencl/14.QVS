@@ -18,13 +18,13 @@ sub framework.loadcontainer.map(p.FileCSVName)
         let vL.Paths.ContainerProcessType = peek('processType',$(vL.From_Loop),'containersPaths');
 
         let pathsCode.MainCode_$(vL.Paths.ContainerVariableName) = '$(paths.code)$(vL.Paths.ContainerValue)';
-
+                
         if '$(vL.Paths.ContainerProcessType)' = 'extract' then
-            set paths.SubFolderQVDExtract_$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))/01.extract/qvd/';
+            set paths.QVDExtract.$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))';
         elseif '$(vL.Paths.ContainerProcessType)' = 'transform' then
-            set paths.SubFolderQVDTransform_$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))/02.transform/qvd/';
+            set paths.QVDTransform.$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))';
         elseif '$(vL.Paths.ContainerProcessType)' = 'transformfinal' then
-            set paths.SubFolderQVDload_$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))/04.load/qvd/';
+            set paths.QVDLoad.$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))';
         endif
 
 	next

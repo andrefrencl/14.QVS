@@ -18,7 +18,7 @@ sub vendas.DIARIOBORDO (p.ID)
 		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
 		let vL.FileNameQVD = 'Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD';
 
-		call fG.FileExists('$(vr.vendas)Diario_de_Bordo\','$(vL.FileNameQVD)');
+		call fG.FileExists('$(paths.QVDExtract.ex_vendasdiariodebordo)','$(vL.FileNameQVD)');
 		IF $(vG.FileExists)= 0 THEN 
 			// se nao tiver, pegar do mes anterior
 			let vCarrega = date(
@@ -52,7 +52,7 @@ sub vendas.DIARIOBORDO (p.ID)
 			QTD_ESTOQUE, VLR_ESTOQUE_PF, 			// ESTOQUE
 			VLR_VPF_PROJETADA, VLR_VPF_3MESES, VLR_VPF_ESTOQUE_LIVRE	//NS
 
-		from [$(vr.vendas)\Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD](qvd);
+		from [$(paths.QVDExtract.ex_vendasdiariodebordo)Vendas_CMV_Agrupado_DiarioBordo_$(vCarrega)_$(vEmpresa).QVD](qvd);
 
 		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
 			/* For tableIdx = 0 to NoOfTables() - 1

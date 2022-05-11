@@ -1,0 +1,53 @@
+*DEV
+      1.Config
+      10.Transporte
+      2.Script
+      >>>>> 3.Entradas
+      4.Extratores
+           *(*******)
+      >>>>> 5.QVDs
+            vendas
+               qlikmart_diarioDeBordo.qvw(já existe)
+                     alterar qvw
+                     2gb.qvd
+                     1) não duplicar altera o qvw original
+                          include de script
+                     2) duplica e não altera o qvw original
+                     3) não duplicar  e não alterar o qvw original
+                           1. gerar semaforo(include de um script)
+      6.QlikMart
+      7.Sa¡das
+      8.Reports
+      9.TXT
+      11.appHOMOL
+      >>>>> 12.Arquivos
+      >>>>> 13.DataTransfer
+      >>>>> 14.QVS
+                code
+                  0_framewok
+                     1_comum
+                          *.qvs todos os projetos/containers
+                  1_extratores
+                       vendas
+                             diariobordo
+                                        qvs
+                                            prep_diariobordo.qvs
+                                        qvd
+                                            vendas_diario_bordo_santacruz_2020_05.qvd
+                       dimensoes
+
+                  2_transforms
+                       1_DataTransfer
+                           vendas
+                                diario_bordo
+                                      5.qvd -> 1_extrator\vendas\diariobordo\qvd
+                           dimensoes
+                                eficienciaEntregas
+                                logistica
+                           contabil
+                           cadastros
+                           financeiro
+                  3_load
+
+                       *.qvs
+                             *.qvf ou *.qvw

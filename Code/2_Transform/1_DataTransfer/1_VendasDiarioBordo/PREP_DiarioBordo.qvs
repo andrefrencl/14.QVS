@@ -16,7 +16,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 		COD_MATERIAL&'-'&DES_CD_M AS [Key Cod Mat CD],
 		COD_FORNECEDOR_PFAT
 	 FROM
-	[$(vr.dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
+	[$(paths.QVDExtract.ex_dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
 	where len(trim(COD_FORNECEDOR_PFAT))>0;
 
     // CARREGANDO VENDAS
@@ -35,7 +35,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 			CMV, VLR_COM_REBATE, 					// CMV
 			QTD_ESTOQUE, VLR_ESTOQUE_PF, 			// ESTOQUE
 			VLR_VPF_PROJETADA, VLR_VPF_3MESES, VLR_VPF_ESTOQUE_LIVRE	//NS
-		from [$(vr.vendas)Diario_de_Bordo\Vendas_CMV_Agrupado_DiarioBordo_$(p.CarregaMes)_$(p.Empresa).QVD](qvd);
+		from [$(paths.QVDExtract.ex_vendasdiariodebordo)Vendas_CMV_Agrupado_DiarioBordo_$(p.CarregaMes)_$(p.Empresa).QVD](qvd);
                
     
     // PRAZO DE COMPRAS
