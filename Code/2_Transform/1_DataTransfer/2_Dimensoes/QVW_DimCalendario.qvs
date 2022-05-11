@@ -1,3 +1,3 @@
 sub index.dimensao.calendario
-    call main.data_base(1,'$(vr.datatransfer.qvd)','DIM_CALENDARIO');
+    call main.data_base(1,'$(paths.QVDExtract.ex_saidaqvd)','DIM_CALENDARIO');
 end sub

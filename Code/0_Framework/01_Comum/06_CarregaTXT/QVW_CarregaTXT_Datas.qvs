@@ -21,13 +21,13 @@ sub TXT.carrega_txt(p.tipoqvd, p.Metodo)
 		MONTHS, 
 		date(date#(DATA_ATUALIZAR,'YYYY-MM-DD'),'YYYYMM') as ANOMES
 	FROM
-	[$(vr.qvs.txt)config_$(p.tipoqvd).txt]
+	[$(paths.QVDExtract.ex_saidatxt)config_$(p.tipoqvd).txt]
 	(txt, utf8, embedded labels, delimiter is ';', msq)
 	where num(date(date#(DATA_ATUALIZAR,'YYYY-MM-DD')))<=$(vHoje);
 	
 	if NoOfRows('temp')=0 then
 		trace ## Encerrado - Nao ha $(p.tipoqvd) $(p.Metodo) para atualizar;
-		call fG.MarqueSemaforo('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', 0);
+		call fG.MarqueSemaforo('$(paths.QVDExtract.ex_saidatxt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', 0);
 
 	else 
 
@@ -52,7 +52,7 @@ sub TXT.gravatxt (ID_temp, p.tipoqvd)
 	temp:
 	LOAD *
 	FROM
-	[$(vr.qvs.txt)config_$(p.tipoqvd).txt]
+	[$(paths.QVDExtract.ex_saidatxt)config_$(p.tipoqvd).txt]
 	(txt, utf8, embedded labels, delimiter is ';', msq)
 	where ID<>$(ID_temp);
 
@@ -62,11 +62,11 @@ sub TXT.gravatxt (ID_temp, p.tipoqvd)
 		ID, MARCA, METODO, MONTHS, 
 		date($(vHoje)+1,'YYYY-MM-DD') as DATA_ATUALIZAR
 	FROM
-	[$(vr.qvs.txt)config_$(p.tipoqvd).txt]
+	[$(paths.QVDExtract.ex_saidatxt)config_$(p.tipoqvd).txt]
 	(txt, utf8, embedded labels, delimiter is ';', msq)
 	where ID=$(ID_temp);
 	
-	Store temp into [$(vr.qvs.txt)config_$(p.tipoqvd).txt](txt, delimiter is ';');
+	Store temp into [$(paths.QVDExtract.ex_saidatxt)config_$(p.tipoqvd).txt](txt, delimiter is ';');
 	drop table temp;
 	
 end sub

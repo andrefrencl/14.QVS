@@ -1,0 +1,3 @@
+﻿//includComand
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\3_Semaforo\0_index_semaforo.qvs);
+CALL index.semaforo.dimensoes;

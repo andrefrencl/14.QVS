@@ -9,6 +9,6 @@ $(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\04_Calendar\da
 $(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\05_Container\1_LoadContainer.qvs);
 $(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\05_Container\2_LoadProduct.qvs);
 $(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\06_CarregaTXT\QVW_CarregaTXT_Datas.qvs);
-$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\07_tools\marqueSemaforo.qvs);
-$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\07_tools\validar.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\07_semaforo\marqueSemaforo.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\0_Framework\01_Comum\07_semaforo\validar.qvs);
 CALL Framework.start;

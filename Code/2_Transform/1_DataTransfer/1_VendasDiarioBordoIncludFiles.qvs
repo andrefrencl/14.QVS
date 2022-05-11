@@ -2,4 +2,4 @@
 $(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\0_index_vendas.qvs);
 $(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\PREP_DiarioBordo.qvs);
 $(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\1_VendasDiarioBordo\diariobordo.qvs);
-CALL index.vendasdiariobordo;
+CALL index.vendas.diariobordo;

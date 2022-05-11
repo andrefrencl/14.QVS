@@ -1,5 +1,5 @@
 
-let pathsCode.frameworkdefault = '$(paths.code)0_Framework\01_Comum\';
+let pathsCode.frameworkdefault = '$(paths.code)14.QVS\Code\0_Framework\01_Comum\';
 let pathsCode.MainCode = '$(paths.code)$(pathsCode.ContainerAtual)';
 
 

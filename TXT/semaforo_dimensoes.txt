@@ -1,2 +1,2 @@
 ﻿status;Data
-DataTransferProcessou;09/05/2022 17:50:09
+QVDGeradoPeloExtrator;11/05/2022 16:01:07

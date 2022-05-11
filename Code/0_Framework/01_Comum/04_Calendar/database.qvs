@@ -108,7 +108,7 @@ sub main.dias.uteis
 	LOAD
 	Concat(Date("FERIADOS",'DD/MM/YYYY'),';') as Feriados
 	FROM
-	[$(vr.entradas.vendas)feriados.xlsx]
+	[$(paths.QVDExtract.ex_entradas_vendas)feriados.xlsx]
 	(ooxml, embedded labels, table is Plan1);
 	//DeclaraÃ¯Â¿Â½Ã¯Â¿Â½o da variavÃ¯Â¿Â½ que recebera os feriados
 	LET strFeriados = Chr(39) & Replace(Peek('Feriados',0,'FeriadosBrasil'),';',Chr(39) & ',' & Chr(39)) & Chr(39);

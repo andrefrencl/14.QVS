@@ -1,14 +1,16 @@
 PathContainerVariableName, PathContainerValue, processType
-ex_vendas, ..\..\5.QVDS\5.1.vendas\, extract
-ex_vendasdiariodebordo, ..\..\5.QVDS\5.1.vendas\Diario_de_Bordo\, extract
-ex_entradas_vendas, ..\..\5.QVDS\3.entradas\Vendas, extract
-ex_entradas_closeup, ..\..\5.QVDS\3.entradas\FF\QVD, extract
-ex_entradas_mapa, ..\..\5.QVDS\3.entradas\MapaEstoque, extract
-ex_entradas_compras, ..\..\5.QVDS\3.entradas\Gestao Compras, extract
-ex_dimensoes, ..\..\5.QVDS\5.5.Dimensões\, extract
-ex_arquivos, ..\..\12.Arquivos\, extract
-tr_1_df_vendas, ..\..\14.QVS\code\2_transform\1_DataTransfer\1_VendasDiarioBordo, transform
-tr_1_imagens, ..\..\1.Config\Imagens, transform
-
-
-
+ex_arquivos, 12.Arquivos\, extract
+ex_arquivos0, 12.Arquivos\0\, extract
+ex_dimensoes, 5.QVDS\5.5.Dimensões\, extract
+ex_entradas_closeup, 5.QVDS\3.entradas\FF\QVD\, extract
+ex_entradas_compras, 5.QVDS\3.entradas\Gestao Compras\, extract
+ex_entradas_mapa, 5.QVDS\3.entradas\MapaEstoque\, extract
+ex_entradas_vendas, 5.QVDS\3.entradas\Vendas\, extract
+ex_leadtime, 5.QVDS\5.9.LeadTime\, extract
+ex_prazocompras, 5.QVDS\5.10.Compras\, extract
+ex_vendas, 5.QVDS\5.1.vendas\, extract
+ex_vendasdiariodebordo, 5.QVDS\5.1.vendas\Diario_de_Bordo\, extract
+tr_1_df_vendas, 14.QVS\code\2_transform\1_DataTransfer\1_VendasDiarioBordo\, transform
+tr_1_imagens, 1.Config\Imagens\, transform
+ex_saidatxt, 14.QVS\TXT\, extract
+ex_saidaqvd, 14.QVS\QVD\, extract

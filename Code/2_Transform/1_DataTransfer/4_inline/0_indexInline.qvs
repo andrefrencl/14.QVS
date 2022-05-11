@@ -5,6 +5,15 @@
 //########################################################################################
 
 
+//########################################
+// INLINES
+//########################################
+sub start.inlineCompleto
+	call inline_tab.metricas;
+	call inline_tab.vDataCarregado;
+	call inline_tab.marca_logo;
+	call inline_tab.escala;
+end sub
 
 sub inline_tab.metricas
     INL_METRICAS:
@@ -13,7 +22,7 @@ sub inline_tab.metricas
         VB
         VPF
         ];
-    call StoreQVD('$(vr.datatransfer.qvd)','INL_METRICAS.qvd','INL_METRICAS',1);
+    call StoreQVD('$(paths.QVDExtract.ex_saidaqvd)','INL_METRICAS.qvd','INL_METRICAS',1);
 end sub;
 
 sub inline_tab.vDataCarregado
@@ -22,7 +31,7 @@ sub inline_tab.vDataCarregado
     load 
         $(vDataCarregado) as UltimoDiaCarregadoSC
     autogenerate 1;
-    call StoreQVD('$(vr.datatransfer.qvd)','INL_DATABASE.qvd','INL_DATABASE',1);
+    call StoreQVD('$(paths.QVDExtract.ex_saidaqvd)','INL_DATABASE.qvd','INL_DATABASE',1);
     
 end sub
 
@@ -31,12 +40,12 @@ sub inline_tab.marca_logo
     INL_MARCA_LOGO:
     LOAD * INLINE [
         NomeEmpresa, local, ordem
-        SANTACRUZ,  '$(vr.imagens.logos)logo_santa.png',1
-        PANPHARMA,  '$(vr.imagens.logos)logo_Pan.png',2
-        ONCOPROD,   '$(vr.imagens.logos)Logo_Onco.png',3
-        GRUPO,      '$(vr.imagens.logos)logo_Fundo_Grupo.bmp',4
+        SANTACRUZ,  '$(paths.QVDTransform.tr_1_imagens)logo_santa.png',1
+        PANPHARMA,  '$(paths.QVDTransform.tr_1_imagens)logo_Pan.png',2
+        ONCOPROD,   '$(paths.QVDTransform.tr_1_imagens)Logo_Onco.png',3
+        GRUPO,      '$(paths.QVDTransform.tr_1_imagens)logo_Fundo_Grupo.bmp',4
         ];
-    call StoreQVD('$(vr.datatransfer.qvd)','INL_MARCA_LOGO.qvd','INL_MARCA_LOGO',1);
+    call StoreQVD('$(paths.QVDExtract.ex_saidaqvd)','INL_MARCA_LOGO.qvd','INL_MARCA_LOGO',1);
 end sub
 
 sub inline_tab.escala
@@ -48,5 +57,5 @@ sub inline_tab.escala
         1000
         1000000
         ];
-    call StoreQVD('$(vr.datatransfer.qvd)','INL_ESCALA.qvd','INL_ESCALA',1);
+    call StoreQVD('$(paths.QVDExtract.ex_saidaqvd)','INL_ESCALA.qvd','INL_ESCALA',1);
 end sub

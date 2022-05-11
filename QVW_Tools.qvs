@@ -1,6 +1,0 @@
-
-
-sub fG.QvdGeradoPeloExtrator(p.Metodo)
-  call fG.MarqueSemaforo('$(vr.qvs.txt)','semaforo_$(p.Metodo).txt','$(p.Metodo)', 1);
-end sub;
-

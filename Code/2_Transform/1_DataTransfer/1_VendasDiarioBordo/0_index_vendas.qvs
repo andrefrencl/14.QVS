@@ -1,7 +1,3 @@
-sub index.vendasdiariobordo
+sub index.vendas.diariobordo
  call start.vendasdiariobordo
-end sub;
-
-sub index.semaforodiariobordo
- call start.FimExtratorVendasDiarioBordo
 end sub;

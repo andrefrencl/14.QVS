@@ -19,6 +19,9 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 	[$(paths.QVDExtract.ex_dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
 	where len(trim(COD_FORNECEDOR_PFAT))>0;
 
+    /// carregando a data base
+    call main.data_base(0,'','');
+
     // CARREGANDO VENDAS
        
         $(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes):
@@ -40,7 +43,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
     
     // PRAZO DE COMPRAS
 	let vL.FileNameQVD = 'PRAZO_COMPRAS_$(p.CarregaMes).qvd';
-	call fG.FileExists('$(vr.prazocompra)','$(vL.FileNameQVD)');
+	call fG.FileExists('$(paths.QVDExtract.ex_prazocompras)','$(vL.FileNameQVD)');
 	IF $(vG.FileExists)= 1 THEN 
 
 		Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)
@@ -55,7 +58,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 		    sum(DestVpfProjMes)         as DE_VLR_VPF_PROJETADA, 
 		    sum(DestVlrEstoquePf)       as DE_VLR_ESTOQUE_PF
 
-		from [$(vr.prazocompra)$(vL.FileNameQVD)](qvd)
+		from [$(paths.QVDExtract.ex_prazocompras)$(vL.FileNameQVD)](qvd)
 		group by 
 			Marca,
 		    UltDtFechada,
@@ -83,7 +86,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
     
     /// adicionando MAPA HISTORICO
 		let vL.FileNameQVD = '$(p.Empresa)_MAPA_ESTOQUE_HIST_ $(p.CarregaMes).qvd';
-		call fG.FileExists('$(vr.entradas.mapa)','$(vL.FileNameQVD)');
+		call fG.FileExists('$(paths.QVDExtract.ex_entradas_mapa)','$(vL.FileNameQVD)');
 		IF $(vG.FileExists)= 1 THEN 
             Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)
             load
@@ -97,7 +100,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
                 (PF*ESTOQUE_LIVRE) as MAPA_VLR_ESTOQUELIVRE, 
                 (PF*ESTOQUE_TOTAL) as MAPA_VLR_ESTOQUETOTAL, 
                 (PF*MEDIA_POND)    as MAPA_VLR_MEDIAPOND
-            from [$(vr.entradas.mapa)$(vL.FileNameQVD)](qvd);
+            from [$(paths.QVDExtract.ex_entradas_mapa)$(vL.FileNameQVD)](qvd);
         else
             // se nao existir, adicione campo zerado
             Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)        
@@ -118,7 +121,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 
     /// adicionando LEAD TIME
 		let vL.FileNameQVD = 'LEADTIME_$(p.Empresa)_$(p.CarregaMes).qvd';
-		call fG.FileExists('$(vr.leadtime)','$(vL.FileNameQVD)');
+		call fG.FileExists('$(paths.QVDExtract.ex_leadtime)','$(vL.FileNameQVD)');
 		IF $(vG.FileExists)= 1 THEN 
 
             Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)
@@ -136,7 +139,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
                 VLR_NF_INTERNO                      as [Valor Liq. NF BRL Interno],  
                 (VLR_POND_TEMPO_LIBERACAO+VLR_POND_ES_DESTINO) 
                                                     as [Pond. Interno]            
-            from [$(vr.leadtime)$(vL.FileNameQVD)](qvd);
+            from [$(paths.QVDExtract.ex_leadtime)$(vL.FileNameQVD)](qvd);
 
         else
 

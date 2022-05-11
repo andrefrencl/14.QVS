@@ -1,0 +1,7 @@
+sub index.semaforo.diariobordo
+ call fG.QvdGeradoPeloExtrator('vendasdiariobordo');
+end sub;
+
+sub index.semaforo.dimensoes
+    call fG.QvdGeradoPeloExtrator('dimensoes');
+end sub;

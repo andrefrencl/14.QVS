@@ -7,9 +7,6 @@
 sub start.vendasdiariobordo
 	call fG.DataTransferValidarPodeProcessar('vendasdiariobordo', 'start.vendasdiariobordoCompleto',0);
 end sub;
-sub start.FimExtratorVendasDiarioBordo
-	call fG.QvdGeradoPeloExtrator('vendasdiariobordo');
-end sub;
 sub start.vendasdiariobordoCompleto
 	call TXT.carrega_txt('vendasdiariobordo','diariobordo');
 end sub
@@ -50,9 +47,6 @@ sub vendasdiariobordo.DIARIOBORDO (p.ID)
 				RENAME Field [$(vFieldname)] TO [$(vPrefix)$(vFieldname)];
 			Next fieldIdx
 			Next tableIdx*/
-
-			/// TEMPORARIO - STORE DO QVD VENDAS
-			STORE $(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega) into [QVD\$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega).qvd](qvd);
 
 			call TXT.gravatxt($(p.ID), 'vendasdiariobordo');
 
