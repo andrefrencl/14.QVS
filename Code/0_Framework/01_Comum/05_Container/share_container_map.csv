@@ -1,3 +1,6 @@
 PathContainerVariableName, PathContainerValue, processType
-ex_01datalake, 01.extractors\01_DataLake, extract
-tr_1_df_vendas, 1_df_vendas, transform
+ex_vendas, 5.QVDS\5.1.vendas\, extract
+ex_vendasdiariodebordo, 5.QVDS\5.1.vendas\Diario_de_Bordo\, extract
+ex_entradas, 5.QVDS\3.entradas\, extract
+ex_dimensoes, 5.QVDS\5.5.Dimensões\, extract
+tr_1_df_vendas, 14.QVS\code\2_transform\1_DataTransfer\1_VendasDiarioBordo, transform
