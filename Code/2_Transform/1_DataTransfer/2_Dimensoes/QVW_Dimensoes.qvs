@@ -20,20 +20,109 @@ sub dimensao.compradores
 	////////// carregando a carteira de compras ////////////////////
 	////////// CRIADO por Andre Ramos
 	
-	$(include=..\3.Entradas\0 INCLUDE\CARTEIRA_COMPRAS_QVD.txt);
-	
-	/// adaptando ao codigo do app
+	//////////////////////////////////////////////////
+	// SCRIPT para carga da CARTEIRA DE COMPRAS
+	// CRIADO POR Andre Ramos
+	//////////////////////////////////////////////////
+
+	mapa_gercateg:
+	Mapping
+	LOAD Distinct
+		[/BIC/CACDCPCAD]  as COD_GERENTE_CATEGORIA, 
+		[/BIC/CADCCPDEN] as NOME_GERENTE_CATEGORIA
+	FROM
+	[$(paths.QVDExtract.ex_origem)BIC_PCACDCPCAD.QVD](qvd) 
+	where len(Trim([/BIC/CACDCPCAD]))>0;
+
+	mapa_ger_compras:
+	Mapping
+	LOAD Distinct
+		[/BIC/CACDCPCAD]  as COD_GERENTE_COMPRAS, 
+		[/BIC/CADCCPDEN] as NOME_GERENTE_COMPRAS
+	FROM
+	[$(paths.QVDExtract.ex_origem)BIC_PCACDCPCAD.QVD](qvd)
+	where len(trim([/BIC/CACDCPCAD]))>0;
+
+	mapa_comprador:
+	Mapping
+	LOAD Distinct
+		[/BIC/CACDCPCAD]  as COD_COMPRADOR, 
+		[/BIC/CADCCPDEN] as COMPRADOR
+	FROM
+	[$(paths.QVDExtract.ex_origem)BIC_PCACDCPCAD.QVD](qvd)
+	where len(trim([/BIC/CACDCPCAD]))>0;
+
+	mapa_forn:
+	Mapping
+	LOAD Distinct
+		[/BIC/CA_VENDP] as COD_F, 
+		TXTMD as NomeSubs
+	FROM
+	[$(paths.QVDExtract.ex_origem)BIC_TCA_VENDP.QVD](qvd)
+	where len(trim([/BIC/CA_VENDP]))>0;
+
+	// tabela que traz a relação dos compradores
+	temp_comprador1:
+	LOAD 
+		[/BIC/CACDCPEST] as Subs, 
+		ApplyMap('mapa_forn',[/BIC/CACDCPEST],null()) as NomeSubs,
+		if([/BIC/CACDCPREG]='VLO','SC',[/BIC/CACDCPREG]) as ORIGEM_COMPRADOR, 
+
+		[/BIC/CACDCPCMP] as COD_COMPRADOR, 
+		applymap('mapa_comprador',[/BIC/CACDCPCMP],null()) as NOME_COMPRADOR,
+
+		[/BIC/CACDCPGST] as COD_GERENTE_CATEGORIA,  
+		ApplyMap('mapa_gercateg',[/BIC/CACDCPGST],null()) as NOME_GER_CATEGORIA,
+		
+		[/BIC/CACDCPGER] as COD_GERENTE_COMPRAS,
+		ApplyMap('mapa_ger_compras',[/BIC/CACDCPGER],null()) as NOME_GER_COMPRAS,
+		
+		[/BIC/CACDCPCPP] as COD_COMPRADOR_PUBL, 
+		applymap('mapa_comprador',[/BIC/CACDCPCPP],null()) as NOME_COMPRADOR_PUBL,
+		
+		[/BIC/CACDCPGTP] as COD_GERENTE_CATEGORIA_PUBL, 
+		ApplyMap('mapa_gercateg',[/BIC/CACDCPGTP],null()) as NOME_GER_CATEGORIA_PUBL,
+			
+		[/BIC/CACDCPGRP] as COD_GERENTE_COMPRAS_PUBL,
+		ApplyMap('mapa_ger_compras',[/BIC/CACDCPGRP],null()) as NOME_GER_COMPRAS_PUBL     
+		
+	FROM
+	[$(paths.QVDExtract.ex_origem)BIC_PCACDCPEST.QVD](qvd);
+
+	NoConcatenate
+	temp_publico:
+	load * Resident temp_comprador1
+	where len(trim(COD_COMPRADOR_PUBL))>0;
+
+	Concatenate(temp_comprador1)
+	load
+		Subs,
+		NomeSubs,
+		if(ORIGEM_COMPRADOR='VLO','SC',ORIGEM_COMPRADOR) as ORIGEM_COMPRADOR, 
+		COD_COMPRADOR_PUBL as COD_COMPRADOR,
+		NOME_COMPRADOR_PUBL as NOME_COMPRADOR,
+		COD_GERENTE_CATEGORIA_PUBL as COD_GERENTE_CATEGORIA,
+		NOME_GER_CATEGORIA_PUBL as NOME_GER_CATEGORIA,
+		COD_GERENTE_COMPRAS_PUBL as COD_GERENTE_COMPRAS,
+		NOME_GER_COMPRAS_PUBL as NOME_GER_COMPRAS,
+		'X' as PUBLICO
+	Resident temp_publico;
+	drop table temp_publico;
+
+	drop fields COD_COMPRADOR_PUBL,NOME_COMPRADOR_PUBL,COD_GERENTE_CATEGORIA_PUBL
+				,NOME_GER_CATEGORIA_PUBL,COD_GERENTE_COMPRAS_PUBL,NOME_GER_COMPRAS_PUBL
+		from temp_comprador1;
+
+	NoConcatenate
 	DIM_COMPRADOR:
-		LOAD Distinct
-			// CHAVE_COMPRADOR as [Key Comprador Marca Subsort],
-		     COD_F as COD_FORNECEDOR_PFAT,
-	//	     REGIAO_COMPRADOR,
-		     UPPER(COMPRADOR) AS COMPRADOR,
-		     upper(GERENTE_CATEGORIA) as GERENCIA
-		Resident temp_comprador
-		where wildmatch(REGIAO_COMPRADOR,'SC','PAN')
-		;
-		drop table temp_comprador;
+	Load  distinct
+		Subs&'-'&if(ORIGEM_COMPRADOR='SC','SANTACRUZ','PANPHARMA') as Key_COMPRADOR,
+		upper(NOME_COMPRADOR) as COMPRADOR,
+		upper(NOME_GER_CATEGORIA) as GERENTE_CATEGORIA,
+		upper(NOME_GER_COMPRAS) as GERENTE_COMPRAS
+	Resident temp_comprador1
+	where wildmatch(ORIGEM_COMPRADOR,'SC','PAN');
+	drop table temp_comprador1;
 
 end sub
 

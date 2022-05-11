@@ -251,5 +251,6 @@ sub main.dias.uteis
 	let vUtilMes = peek('UTEIS_MES',0,'DIM_DIAS_UTEIS');
 	let vUtilVar = peek('UTEIS_VAR',0,'DIM_DIAS_UTEIS');
     drop table TAB_DIASUTEIS;
+	drop table DIM_DIAS_UTEIS;
 
 end sub

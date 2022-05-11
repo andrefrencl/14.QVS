@@ -2,10 +2,11 @@ PathContainerVariableName, PathContainerValue, processType
 ex_arquivos, 12.Arquivos\, extract
 ex_arquivos0, 12.Arquivos\0\, extract
 ex_dimensoes, 5.QVDS\5.5.Dimensões\, extract
-ex_entradas_closeup, 5.QVDS\3.entradas\FF\QVD\, extract
-ex_entradas_compras, 5.QVDS\3.entradas\Gestao Compras\, extract
-ex_entradas_mapa, 5.QVDS\3.entradas\MapaEstoque\, extract
-ex_entradas_vendas, 5.QVDS\3.entradas\Vendas\, extract
+ex_entradas_closeup, 3.entradas\FF\QVD\, extract
+ex_entradas_compras, 3.entradas\Gestao Compras\, extract
+ex_entradas_mapa, 3.entradas\MapaEstoque\, extract
+ex_entradas_vendas, 3.entradas\Vendas\, extract
+ex_origem, 5.QVDS\5.0.Origem\, extract
 ex_leadtime, 5.QVDS\5.9.LeadTime\, extract
 ex_prazocompras, 5.QVDS\5.10.Compras\, extract
 ex_vendas, 5.QVDS\5.1.vendas\, extract

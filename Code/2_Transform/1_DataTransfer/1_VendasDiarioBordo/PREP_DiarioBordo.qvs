@@ -19,11 +19,10 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 	[$(paths.QVDExtract.ex_dimensoes)BW_MATERIAL_FORNECEDOR_CD.QVD](qvd)
 	where len(trim(COD_FORNECEDOR_PFAT))>0;
 
-    /// carregando a data base
-    call main.data_base(0,'','');
+    // ao carregar os dias uteis, ja carrega tb o data base
+    CALL main.dias.uteis;
 
     // CARREGANDO VENDAS
-       
         $(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes):
         load 
 			NomeEmpresa, 
@@ -31,9 +30,13 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 			num(date(MonthName)) as %OrderDate, 
 			DES_CD, TIPOVENDA,	IDENT_FORNECEDOR, TIPO_OPERACAO_VENDAS, 
             applymap('mapa_codf', [Key Cod Mat CD], null()) as COD_FORNECEDOR_PFAT,
+            applymap('mapa_codf', [Key Cod Mat CD], null())&'-'&NomeEmpresa as Key_COMPRADOR,
 			
 			// metricas
 			VB, VB_DEVOL, VPF, QTD,	Desconto, 		// VENDSA
+            (VB/$(vUtilVar))*$(vUtilMes)            as VB_PROJETADO,
+            (VPF/$(vUtilVar))*$(vUtilMes)           as VPF_PROJETADO,
+            (QTD/$(vUtilVar))*$(vUtilMes)           as QTD_PROJETADO,
 			TOTAL_CONTABIL_PV, TOTAL_PONDERADO_PV,  // PRAZO VENDA
 			CMV, VLR_COM_REBATE, 					// CMV
 			QTD_ESTOQUE, VLR_ESTOQUE_PF, 			// ESTOQUE
@@ -52,6 +55,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 		    num(UltDtFechada) as %OrderDate,
 		    Material&'-'&CD AS [Key Cod Mat CD],
 			applymap('mapa_codf',Material&'-'&CD,null()) as COD_FORNECEDOR_PFAT,
+            applymap('mapa_codf',Material&'-'&CD, null())&'-'&Marca as Key_COMPRADOR,
 		    CD as DES_CD, 
 		    sum(PcomVlrPrazoCompraPon)  as PC_FATOR_PONDERA, 
 		    sum(PcomVlrContCmpFat)      as PC_VLR_PRZ_COMPRA_TOT, 
@@ -59,6 +63,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 		    sum(DestVlrEstoquePf)       as DE_VLR_ESTOQUE_PF
 
 		from [$(paths.QVDExtract.ex_prazocompras)$(vL.FileNameQVD)](qvd)
+        where wildmatch(Marca,'SANTACRUZ','PANPHARMA')
 		group by 
 			Marca,
 		    UltDtFechada,
@@ -75,6 +80,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 		        '' AS [Key Cod Mat CD],
                 '' as DES_CD,
                 '' as COD_FORNECEDOR_PFAT,
+                '' as Key_COMPRADOR,
                 0 as PC_FATOR_PONDERA, 
                 0 as PC_VLR_PRZ_COMPRA_TOT, 
                 0 as DE_VLR_VPF_PROJETADA, 
@@ -97,6 +103,8 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
                 CD                              as DES_CD, 
                 applymap('mapa_codf','000000000000'&CODPRO&'-'&CD, null()) 
                                                 as COD_FORNECEDOR_PFAT,
+                applymap('mapa_codf','000000000000'&CODPRO&'-'&CD, null())&'-'&
+                    if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) as Key_COMPRADOR,              
                 (PF*ESTOQUE_LIVRE) as MAPA_VLR_ESTOQUELIVRE, 
                 (PF*ESTOQUE_TOTAL) as MAPA_VLR_ESTOQUETOTAL, 
                 (PF*MEDIA_POND)    as MAPA_VLR_MEDIAPOND
@@ -111,6 +119,7 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
                     '' AS [Key Cod Mat CD],
                     '' as DES_CD,
                     '' as COD_FORNECEDOR_PFAT,
+                    '' as Key_COMPRADOR,
                     0 as MAPA_VLR_ESTOQUELIVRE, 
                     0 as MAPA_VLR_ESTOQUETOTAL ,
                     0 as MAPA_VLR_MEDIAPOND
@@ -131,6 +140,8 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
                 num(date(date#(CALMONTH,'YYYYMM'))) as %OrderDate,  
                 DES_CD, 
                 SUBSORTIMENTO                       as COD_FORNECEDOR_PFAT,
+                SUBSORTIMENTO&'-'&
+                        if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) as Key_COMPRADOR,
                 ID_LEADTIME, 
                 
                 VLR_NF_LT_EXTERNO                   as [Valor Liq. NF BRL],  
@@ -151,6 +162,8 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
                     $(vDataCarregado)           as %OrderDate,
                     '' AS [Key Cod Mat CD],
                     '' as DES_CD,
+                    '' as COD_FORNECEDOR_PFAT,
+                    '' as Key_COMPRADOR,
                     '' as ID_LEADTIME,
                     0  as [Valor Liq. NF BRL],  
                     0  as [Pond. Fat ate Entrega],  
