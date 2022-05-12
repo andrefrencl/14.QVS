@@ -1,0 +1,2 @@
+﻿status;Data
+DataTransferProcessou;12/05/2022 09:48:02

@@ -1,0 +1,5 @@
+﻿//includComand
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\6_RevisaoCliente\0_index_revisaocliente.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\6_RevisaoCliente\PREP_revisaocliente.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\6_RevisaoCliente\revisaocliente.qvs);
+CALL index.vendas.revisaocliente;

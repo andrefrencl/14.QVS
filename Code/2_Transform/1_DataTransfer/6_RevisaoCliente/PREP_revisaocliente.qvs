@@ -1,0 +1,41 @@
+//########################################################################################
+// Script para montar a Fato da REvisao do Cliente para o Qlik Sense
+// Baseado nos extratores do Qlikview
+// Autor: Andre Ramos       Data: 04/05/2022
+//########################################################################################
+// DEPENDENCIAS:    
+//                  
+//                  
+//########################################################################################
+
+sub preparacao.revisaocliente(p.Metodo, p.Empresa, p.CarregaMes, p.FileName);
+
+	
+    // ao carregar os dias uteis, ja carrega tb o data base
+    CALL main.dias.uteis;
+
+    // CARREGANDO VENDAS
+        $(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes):
+        load 
+			NomeEmpresa, 
+			[Key Cliente], 
+            num(right(left([Key Cliente],10),6)) as COD_CLIENTE_SAP,
+			num(date(MonthName)) as %OrderDate, 
+			TIPOVENDA,
+            DES_BAND_GMR,
+            Pacote,
+			
+			// metricas
+			VB, VPF, QTD, 		// VENDSA
+            (VB/$(vUtilVar))*$(vUtilMes)            as VB_PROJETADO,
+            (VPF/$(vUtilVar))*$(vUtilMes)           as VPF_PROJETADO,
+            (QTD/$(vUtilVar))*$(vUtilMes)           as QTD_PROJETADO,
+            VALOR_TOTAL_CONTABIL, 
+            VALOR_TOTAL_CONTABIL_PRAZO_PONDERADO, 
+            CMV_CPRE
+
+		from [$(paths.QVDExtract.ex_vendas)$(p.FileName)](qvd);
+ 
+    let vEmpresa = '$(p.Empresa)';
+
+end sub

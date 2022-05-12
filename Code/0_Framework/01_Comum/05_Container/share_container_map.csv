@@ -9,9 +9,9 @@ ex_entradas_vendas, 3.entradas\Vendas\, extract
 ex_origem, 5.QVDS\5.0.Origem\, extract
 ex_leadtime, 5.QVDS\5.9.LeadTime\, extract
 ex_prazocompras, 5.QVDS\5.10.Compras\, extract
-ex_vendas, 5.QVDS\5.1.vendas\, extract
+ex_vendas, 5.QVDS\5.1.Vendas\, extract
 ex_vendasdiariodebordo, 5.QVDS\5.1.vendas\Diario_de_Bordo\, extract
+ex_saidatxt, 14.QVS\TXT\, extract
+ex_saidaqvd, 7.Saídas\QVD\, extract
 tr_1_df_vendas, 14.QVS\code\2_transform\1_DataTransfer\1_VendasDiarioBordo\, transform
 tr_1_imagens, 1.Config\Imagens\, transform
-ex_saidatxt, 14.QVS\TXT\, extract
-ex_saidaqvd, 14.QVS\QVD\, extract

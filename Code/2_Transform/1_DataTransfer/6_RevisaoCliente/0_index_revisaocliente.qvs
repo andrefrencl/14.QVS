@@ -1,0 +1,3 @@
+sub index.vendas.revisaocliente
+ call start.vendas.revisaocliente
+end sub;

@@ -1,0 +1,58 @@
+
+
+//########################################
+// VENDAS - DIARIO DE BORDO
+//########################################
+
+sub start.vendas.revisaocliente
+	call fG.DataTransferValidarPodeProcessar('revisaocliente', 'start.revisaoclienteCompleto',0);
+end sub;
+sub start.revisaoclienteCompleto
+	call TXT.carrega_txt('revisaocliente','revisaocliente');
+end sub
+
+sub revisaocliente.revisaocliente (p.ID)
+
+		let vCarrega = $(vAnoMes);  // pega o ano mes baseado na data do txt - mes setado para carga
+		let vL.FileNameQVD = '$(vEmpresa)_Vendas_Revisao_Cliente_$(vCarrega).QVD';
+		
+		call fG.FileExists('$(paths.QVDExtract.ex_vendas)','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 0 THEN 
+			// se nao tiver, pegar do mes anterior
+			let vCarrega = date(
+						 	(num(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									)-1),'YYYYMM');
+		else 			
+			// se tiver, pegar de acordo com o config
+			let vCarrega = date(
+								addmonths(
+									date(date#($(vAnoMes),'YYYYMM'))
+									,$(vMonth)
+									)
+									,'YYYYMM');
+		end if
+
+		call preparacao.revisaocliente('$(vMetodo)','$(vEmpresa)','$(vCarrega)','$(vL.FileNameQVD)');
+
+		// RENOMEAR CAMPOS DINAMICAMENTE da TABELA
+			/* For tableIdx = 0 to NoOfTables() - 1
+			Let vTableName = TableName($(tableIdx));
+			Let vPrefix = '$(vMetodo)_';
+			For fieldIdx = 1 to NoOfFields('$(vTableName)')
+				LET vFieldname = FieldName($(fieldIdx), '$(vTableName)');
+				RENAME Field [$(vFieldname)] TO [$(vPrefix)$(vFieldname)];
+			Next fieldIdx
+			Next tableIdx*/
+
+		trace depois = $(vEmpresa);
+		
+			// HABILITAR se for usar QVD Standalone
+		call StoreQVD('$(paths.QVDExtract.ex_saidaqvd)','$(vMetodo)_$(vEmpresa)_$(vCarrega)','$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega)',1);
+			
+		call TXT.gravatxt($(p.ID), 'revisaocliente');
+
+end sub

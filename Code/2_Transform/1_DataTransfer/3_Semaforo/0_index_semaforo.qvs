@@ -5,3 +5,7 @@ end sub;
 sub index.semaforo.dimensoes
     call fG.QvdGeradoPeloExtrator('dimensoes');
 end sub;
+
+sub index.semaforo.revisaocliente
+ call fG.QvdGeradoPeloExtrator('revisaocliente');
+end sub;
