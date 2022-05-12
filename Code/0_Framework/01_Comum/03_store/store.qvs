@@ -8,9 +8,9 @@ sub StoreFile(p.Path,p.FileName,p.ResidentName, p.extensionFile, is_Drop)
   trace --- p.Path:$(p.Path), p.FileName: $(p.FileName), p.ResidentName: $(p.ResidentName), p.extensionFile: $(p.extensionFile) ;
   let p.extensionFile = Lower('$(p.extensionFile)');
   if '$(p.extensionFile)' = 'qvd' then
-  	Store [$(p.ResidentName)] into [$(p.Path)$(p.FileName)]($(p.extensionFile));
+  	Store [$(p.ResidentName)] into [$(p.Path)$(p.FileName).$(p.extensionFile)]($(p.extensionFile));
   else
-	  Store [$(p.ResidentName)] into [$(p.Path)$(p.FileName)]($(p.extensionFile), delimiter is ';');
+	  Store [$(p.ResidentName)] into [$(p.Path)$(p.FileName).$(p.extensionFile)]($(p.extensionFile), delimiter is ';');
   endif
 
   if $(is_Drop) = 1 then

@@ -1,3 +1,0 @@
-sub index.dimensao.calendario
-    call main.data_base(1,'$(paths.QVDExtract.ex_saidaqvd)','DIM_CALENDARIO');
-end sub

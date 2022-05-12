@@ -1,0 +1,3 @@
+﻿//includComand
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\1_DataTransfer\5_Calendario\0_index_calendario.qvs);
+CALL index.calendario;

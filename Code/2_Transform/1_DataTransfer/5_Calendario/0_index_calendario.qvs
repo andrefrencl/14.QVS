@@ -1,0 +1,8 @@
+sub index.calendario
+    // para gerar QVD
+    //call main.data_base(1,'$(paths.QVDExtract.ex_saidaqvd)','DIM_CALENDARIO');
+
+    // para gerar tabela
+    call main.data_base(1,'','');
+
+end sub
