@@ -52,7 +52,7 @@ sub vendasdiariobordo.DIARIOBORDO (p.ID)
 		trace depois = $(vEmpresa);
 		
 			// HABILITAR se for usar QVD Standalone
-		//call StoreQVD('$(paths.QVDExtract.ex_saidaqvd)','$(vMetodo)_$(vEmpresa)_$(vCarrega)','$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega)',1);
+		call StoreQVD('$(paths.QVDExtract.ex_saidaqvd)','$(vMetodo)_$(vEmpresa)_$(vCarrega)','$(vMetodo)_VENDAS_$(vEmpresa)_$(vCarrega)',1);
 			
 		call TXT.gravatxt($(p.ID), 'vendasdiariobordo');
 

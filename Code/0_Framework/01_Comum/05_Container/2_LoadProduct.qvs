@@ -12,12 +12,11 @@ sub framework.loadproduct.map(p.FileCSVName)
     trace 'rows containersPaths';
 
 	for vL.From_Loop = 0 to vL.To_Loop-1
-        let vL.Paths.ContainerVariableName = peek('PathContainerVariableName', $(vL.From_Loop),'containersPaths');
+        let vL.Paths.ContainerVariableName = peek('Path ContainerVariableName', $(vL.From_Loop),'containersPaths');
         let vL.Paths.ContainerValue = peek('PathContainerValue',$(vL.From_Loop),'containersPaths');
         
 
-        let pathsCode.MainCode_$(vL.Paths.ContainerVariableName) = '$(paths.code)$(vL.Paths.ContainerValue)';
-        set paths.SubFolderQVDload_$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))/04.load/qvd/';
+        set paths.QVDLoad.$(vL.Paths.ContainerVariableName) = '$(pathsCode.MainCode_$(vL.Paths.ContainerVariableName))';
         trace 'paths.SubFolderQVDload_$(vL.Paths.ContainerVariableName)';
         trace '$(paths.SubFolderQVDload_$(vL.Paths.ContainerVariableName))';
 	next

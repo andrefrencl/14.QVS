@@ -1,0 +1,3 @@
+﻿//includComand
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\3_Load\1_Comercial\1_DiarioBordo\index.diariodebordo.qvs);
+CALL index.load.diariobordo;

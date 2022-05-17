@@ -1,0 +1,3 @@
+sub index.historico.vendas.diariobordo
+ call start.historico.vendas.diariobordo;
+end sub;

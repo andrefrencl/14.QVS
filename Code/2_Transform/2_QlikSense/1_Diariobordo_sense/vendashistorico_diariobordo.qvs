@@ -1,0 +1,32 @@
+sub start.historico.vendas.diariobordo
+
+
+    call main.data_base(0,'','');
+    let vCarrega = year($(vDataCarregado))-1&'01';
+
+    for each vEmpresa in 'SC','PAN'//,'ONCO'
+
+        FOR Each vPeriodoBaseCargaIncremental in $(vCarrega)	
+
+            LET vQtdPeriodosCarregar = Round((MonthStart(vDataCarregado) - Date#(vPeriodoBaseCargaIncremental, 'YYYYMM')) / 30.5)+1;	
+                
+            FOR a=1 to vQtdPeriodosCarregar	
+                IF a > 1 then
+                    LET vPeriodoBaseCargaIncremental = Date(AddMonths(Date#(vPeriodoBaseCargaIncremental, 'YYYYMM'), 1), 'YYYYMM');
+                ENDIF
+
+                tab:
+                LOAD *
+                FROM
+                [$(paths.QVDExtract.ex_saidaqvd)DIARIOBORDO_$(vEmpresa)_$(vPeriodoBaseCargaIncremental).qvd]
+                (qvd);
+
+            NEXT
+        next 
+    
+    next
+    
+    call StoreFile('$(paths.QVDExtract.ex_saidaqvd)','FATO_DIARIOBORDO','tab', 'qvd', 0);
+    trace ---:: QVD FATO DIARIO BORDO atualizado com sucesso.;
+end sub
+
