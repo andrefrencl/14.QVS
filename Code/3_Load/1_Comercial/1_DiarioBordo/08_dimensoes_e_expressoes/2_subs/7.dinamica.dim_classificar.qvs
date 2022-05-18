@@ -1,0 +1,112 @@
+
+sub dinamica.dim_regras
+
+  set vL.PainelName = 'SASFRAUDE';
+
+    trace ################;
+    trace DIM_REGRAS_OPERACIONAL;
+    trace ################;
+
+
+    CALL TransformacaoStage('DIM_REGRAS','DIM_REGRAS_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+    
+        DIM_REGRAS:
+        LOAD
+          "DescriÃƒÂ§ÃƒÂ£o Regras",
+          "Tipo InformaÃƒÂ§ÃƒÂ£o Regras",
+          "Nome InformaÃƒÂ§ÃƒÂ£o Regras",
+          subfield("Tags Regras",';') as [Tags Regras],
+          "Status",
+          "prioridade",
+          "ObjectID"
+        FROM [$(vG.ImportPath)DimensoesMedidas.xlsx]
+        (ooxml, embedded labels, table is Regras);
+
+    CALL InicializaStoreQvd;
+
+end sub;
+
+sub dinamica.dim_dimensao_unica
+  /* CRIANDO CONJUNTO DE DIMENSÃƒâ€¢ES E MEDIDAS */
+  trace ################;
+  trace DIM_DIMENSAO_UNICA;
+  trace ################;
+
+  CALL TransformacaoStage('DIM_DIMENSAO_UNICA_$(vL.PainelName)','DIM_DIMENSAO_UNICA_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+   call dinamica.SepararDimensoes('$(vL.PainelName)');
+  CALL InicializaStoreQvd;
+end sub;
+
+sub dinamica.dimensao
+  trace ################;
+  trace DIMENSAO;
+  trace ################;
+
+  CALL TransformacaoStage('DIMENSAO_$(vL.PainelName)','DIM_DIMENSAO_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+   call dinamica.DimensoesporAbas('$(vL.PainelName)');
+  CALL InicializaStoreQvd;
+end sub;
+
+sub dinamica.configuradimensao
+ call dinamica.configuracaoDimensao('$(vL.PainelName)');
+    /* tratando se existem linhas para grupos de configuraÃƒÂ§ÃƒÂ£o. */
+    if(Alt(NoOfRows('grupos_$(vL.PainelName)'),-1))>0 then
+
+      FOR i = 0 to NoOfRows('grupos_$(vL.PainelName)')-1
+          let vL.GrupoName = Peek('GruposCalculo',$(i), 'grupos_$(vL.PainelName)');
+          let vL.GrupoNameUpper = upper('$(vL.GrupoName)');
+          CALL TransformacaoStage('DIM_GRUPOS_DIMENSOES_$(vL.PainelName)_$(vL.GrupoName)','DIM_GRUPOS_DIMENSOES_$(vL.PainelName)_$(vL.GrupoNameUpper)','DIMENSIONAL','TR','EST','QVD','CARGA');
+
+          call dinamica.SepararDimensoesDeCalculo('$(vL.GrupoName)','$(vL.PainelName)');
+          /* tratando linhas para grupos de dimensÃƒÂµes. */
+          if(Alt(NoOfRows('DIM_GRUPOS_DIMENSOES_$(vL.PainelName)_$(vL.GrupoName)'),-1))>0 then
+            CALL InicializaStoreQvd;
+          ELSE
+            DROP TABLE DIM_GRUPOS_DIMENSOES_$(vL.PainelName)_$(vL.GrupoName);
+          endif
+
+      NEXT
+
+    endif
+
+  drop table grupos_$(vL.PainelName);
+  drop table CONFIGURACAO_DIMENSAO_$(vL.PainelName);
+  trace ################;
+  trace DIM_DIMENSAO_UNICA;
+  trace ################;
+
+  CALL TransformacaoStage('DIM_MEDIDAS_UNICA_$(vL.PainelName)','DIM_MEDIDAS_UNICA_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+   CALL dinamica.SepararMedidasUnica('$(vL.PainelName)');
+  CALL InicializaStoreQvd;
+end sub;
+
+sub dinamica.selecaotop
+  trace ################;
+  trace SELECAOTOP;
+  trace ################;
+
+  CALL TransformacaoStage('SELECAOTOP_$(vL.PainelName)','DIM_SELECAOTOP_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+   call dinamica.SelecaoTop('$(vL.PainelName)');
+  CALL InicializaStoreQvd;
+end sub;
+
+sub dinamica.dim_medidas
+  trace ################;
+  trace DIM_MEDIDAS;
+  trace ################;
+
+  CALL TransformacaoStage('DIM_MEDIDAS_$(vL.PainelName)','DIM_MEDIDAS_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+    call dinamica.SepararMedidas('$(vL.PainelName)');
+  CALL InicializaStoreQvd;
+end sub;
+
+sub dinamica.dim_classificar
+  trace ################;
+  trace DIM_CLASSIFICAR;
+  trace ################;
+
+  CALL TransformacaoStage('DIM_CLASSIFICAR_$(vL.PainelName)','DIM_CLASSIFICAR_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+   call dinamica.classificar('$(vL.PainelName)');
+  CALL InicializaStoreQvd;
+  drop table Medidas;
+end sub;

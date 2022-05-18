@@ -1,14 +1,14 @@
 
 let pathsCode.frameworkdefault = '$(paths.code)14.QVS\Code\0_Framework\01_Comum\';
+let pathsCode.includepath = '$(paths.code)14.QVS\Code\Includes\';
 let pathsCode.MainCode = '$(paths.code)$(pathsCode.ContainerAtual)';
-
 
 sub ScanFolder(Root,scn.tableresident)
         // trace 'root:$(Root)';
         for each FileExtension in 'qvs'
                 for each FoundFile in filelist( Root & '\*.' & FileExtension)
                         // trace 'fonded file';
-                        if  wildmatch(trim(lower('$(FoundFile)')),'*IncludFiles.qvs*','*autoinclude.qvs*') = 0  then
+                        if  wildmatch(trim(lower('$(FoundFile)')),'*IncludFiles*','*autoinclude*') = 0  then
                                 trace $(FoundFile);
                                 Concatenate($(scn.tableresident))
                                 Load
@@ -39,14 +39,14 @@ Sub Includ.ScanIncludOfFolders(scnIncl.tableresident)
         endif
 end sub;
 
-sub Includ.CreateCleanFile(p.PathInclud)
+sub Includ.CreateCleanFile(p.ComplementNameFile)
         noconcatenate
         ListFileInclude1:
         Load
                 ' ' as [//includComand]
         Autogenerate(0);
 
-        STORE ListFileInclude1 Into $(p.PathInclud)IncludFiles.qvs (txt);
+        STORE ListFileInclude1 Into $(pathsCode.includepath)IncludFiles_$(p.ComplementNameFile).qvs (txt);
 end Sub;
 
 SUB Includ.index(p.PathInclud, p.LastCall)
@@ -66,7 +66,7 @@ SUB Includ.index(p.PathInclud, p.LastCall)
 
 
 	let p.ComplementNameFile = Date(Now(), 'YYYY_MM_DD_hh_mm_ss');
-        call Includ.CreateCleanFile('$(p.PathInclud)');
+        call Includ.CreateCleanFile('$(p.ComplementNameFile)');
 
         WorkCode:
         LOAD * INLINE [Path
@@ -81,13 +81,13 @@ SUB Includ.index(p.PathInclud, p.LastCall)
                         'CALL $(p.LastCall);' as [//includComand]
                 Autogenerate(1);
         endif
-        STORE ListFileInclude1 Into $(p.PathInclud)IncludFiles.qvs (txt);
+        STORE ListFileInclude1 Into $(pathsCode.includepath)IncludFiles_$(p.ComplementNameFile).qvs (txt);
 
         drop table ListFileInclude1;
         
         drop table WorkCode;
 
-        $(Include=$(p.PathInclud)IncludFiles.qvs);
+        $(Include=$(pathsCode.includepath)IncludFiles_$(p.ComplementNameFile).qvs);
 end sub;
 
 

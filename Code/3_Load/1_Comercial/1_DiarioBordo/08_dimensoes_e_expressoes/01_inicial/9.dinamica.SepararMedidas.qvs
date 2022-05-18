@@ -1,0 +1,44 @@
+
+
+
+sub dinamica.SepararMedidas(vL.PainelName)
+
+    trace ################;
+    trace dinamica.SepararMedidas;
+    trace ################;
+    /*
+      lista de variaveis "disponivel no custom.variables", agrupamento e atributos
+      que permite ao usuário selecionar 
+
+      "$nome da variavel"               = nome identico as do arquivo "custom.variables" com as expressões 
+      ,"Nome Medida"                    = nome amigavel exbido pelo usuário 
+      ,"Grupo de Medida"                = agrupamento das analises conforme necessidade do usuário
+      ,"$Calculo Medida"                = Agrupamento de Calculos.
+      ,"$Conjunto de Exibição"          = tipo de graficos para exibição
+      ,"$Formato Resultado"             = formato de exibição ex: "#.###,00", etc
+      ,"$Ordem Visualização Medida"     = ordem de exibição no grafico
+      , $Dimensão Configurada           = Grupo De calculo da Dimensão
+    */
+
+    /* Criar medidas separadas dos filtros do usuario */
+    DIM_MEDIDAS_$(vL.PainelName):
+    LOAD
+        "$Ordem Visualização Medida",
+        "$MedidaID"
+    FROM [$(vG.ImportPath)DimensoesMedidas.xlsx]
+    (ooxml, embedded labels, table is AbasMedidas$(vL.PainelName));
+
+    left join (DIM_MEDIDAS_$(vL.PainelName))
+    LOAD
+        [$Nome da Variavel],
+        [Nome Medida],
+        [Grupo de Medida],
+        [$Calculo Medida],
+        [$Conjunto de Exibição],
+        [$Formato Resultado],
+        [$Dimensão Configurada],
+        [$MedidaID]
+    Resident Medidas
+    /*garantindo integridade e otimização */
+    where exists([$MedidaID]);
+end sub;

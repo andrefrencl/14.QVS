@@ -1,0 +1,59 @@
+
+
+/*
+#############
+TRATANDO DIMENSÕES
+#############
+*/
+
+
+Sub dinamica.DimensoesporAbas(vL.PainelName)
+
+  trace ################;
+  trace dinamica.DimensoesporAbas;
+  trace ################;
+
+    /*
+      Lista de dimensões agrupadas, com ordem de visualização
+      para escolha dinamica pelo usuário
+    */
+    DIMENSAO_$(vL.PainelName):
+    load *
+    /* capturando apenas ordem preenchida*/
+    where num#(len([$Ordem Visualizar Dimensão]))>0;
+        LOAD distinct
+            "$DimensaoID",
+            "$Ordem Visualizar Dimensão",
+            // Dimensão,
+            "Grupo Para Analise"
+        FROM [$(vG.ImportPath)DimensoesMedidas.xlsx]
+        (ooxml, embedded labels, table is AbasDimensao$(vL.PainelName));
+
+     call LoadApenasDimensao;
+
+        left join (DIMENSAO_$(vL.PainelName))
+        LOAD distinct
+            "$DimensaoID",
+            "Rotulo Dimensão",
+            Dimensão,
+            "$Tipo Calculo da Dimensão",
+            GrupoDaDimensao
+        Resident apenasdimensao
+        /*garantindo integridade e otimização */
+        where exists([$DimensaoID]);
+
+        drop table apenasdimensao;
+
+    /* tratar para evitar erros de cadastros */
+        noconcatenate
+        testeerror:
+        load duplicateordem
+        /* capturar apenas casos duplicados */
+        where contagem>1;
+        Load [$Ordem Visualizar Dimensão] as duplicateordem
+            , count([$Ordem Visualizar Dimensão]) as contagem
+        resident DIMENSAO_$(vL.PainelName)
+        group by [$Ordem Visualizar Dimensão] ;
+
+    CALL dinamica.ValidarErroDuplicidadeDIM_EXPR('DIMENSÃO');;
+end sub;

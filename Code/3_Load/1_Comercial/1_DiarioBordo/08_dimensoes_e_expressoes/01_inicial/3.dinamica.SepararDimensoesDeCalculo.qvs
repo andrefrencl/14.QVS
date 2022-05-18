@@ -1,0 +1,25 @@
+
+/*
+ Separar os diversos grupos de dimensão dinamicamente
+*/
+Sub dinamica.SepararDimensoesDeCalculo(vL.ApelidoGrupo, vL.PainelName)
+
+  trace ################;
+  trace dinamica.SepararDimensoesDeCalculo;
+  trace ################;
+
+    let vL.ApelidoCampo = capitalize('$(vL.ApelidoGrupo)');
+
+    DIM_GRUPOS_DIMENSOES_$(vL.PainelName)_$(vL.ApelidoGrupo):
+    load 
+        [Dimensão Config]                    as [Dimensão Config P/ $(vL.ApelidoCampo)],
+        [Rotulo Dimensão Config]             as [Rotulo Dimensão Config P/ $(vL.ApelidoCampo)],
+        [$Ordem Visualizar Dimensão Config]  as [$Ordem Visualizar Dimensão Config $(vL.ApelidoCampo)],
+        [$Tipo Calculo da Dimensão Config]   as [$Tipo Calculo da Dimensão Config $(vL.ApelidoCampo)]
+    resident CONFIGURACAO_DIMENSAO_$(vL.PainelName)
+    /* separando grupo de campos configuraveis para calculo e outras configurações como filtro */
+    WHERE [Grupo de Dimensão Config] = '$(vL.ApelidoGrupo)'
+    ;
+
+
+end sub;

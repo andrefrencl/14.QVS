@@ -1,0 +1,48 @@
+  
+sub dinamica.configuracaoDimensao(vL.PainelName)
+  /*
+  #############
+  TRATANDO CONFIGURAÇÕES
+  #############
+  */
+  
+  trace ################;
+  trace dinamica.configuracaoDimensao;
+  trace ################;
+
+  CONFIGURACAO_DIMENSAO_$(vL.PainelName):
+    load *
+      /*garantindo ordem preenchida */
+      where num#(len([$Ordem Visualizar Dimensão Config]))>0;
+      LOAD
+          "$DimensaoID"                                                 AS [$DimensaoID Config],
+          "$Ordem Visualizar Dimensão"                                  AS [$Ordem Visualizar Dimensão Config],
+          // Dimensão                                                      AS [Dimensão Config],
+        Lower((TRIM(Replace([Grupo de Dimensão],'Calculo - ',''))))     AS [Grupo de Dimensão Config]
+
+      FROM [$(vG.ImportPath)DimensoesMedidas.xlsx]
+      (ooxml, embedded labels, table is ConfiguraçãoDimensao)
+      /* garantindo campos conforme o objetivo */
+      where [Grupo de Dimensão] like 'Calculo - *';
+
+     call LoadApenasDimensao;
+
+      left join (CONFIGURACAO_DIMENSAO_$(vL.PainelName))
+      LOAD
+          "$DimensaoID"                 as [$DimensaoID Config],
+          "Rotulo Dimensão"             as [Rotulo Dimensão Config],
+          Dimensão                      as [Dimensão Config],
+          "$Tipo Calculo da Dimensão"   as [$Tipo Calculo da Dimensão Config],
+          GrupoDaDimensao               as [GrupoDaDimensao Config]
+      Resident apenasdimensao
+      /* garantindo integridade e otimização */
+      where exists([$DimensaoID Config],[$DimensaoID]);
+    drop table apenasdimensao;
+
+    grupos_$(vL.PainelName):
+    load distinct
+        [Grupo de Dimensão Config] as GruposCalculo
+    resident CONFIGURACAO_DIMENSAO_$(vL.PainelName)
+    ;
+
+end sub;

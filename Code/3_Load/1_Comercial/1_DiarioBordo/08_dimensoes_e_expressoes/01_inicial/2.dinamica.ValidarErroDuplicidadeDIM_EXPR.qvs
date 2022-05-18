@@ -1,0 +1,29 @@
+
+/* validar duplicidade de linhas na tabela: "testeerror" com uma coluna: "duplicateordem" , usada para dimensões e medidas 
+  requisito criar tabela 
+  parametros:
+      vL.texto: mensagem de erro
+        exemplo: call dinamica.ValidarErroDuplicidadeDIM_EXPR('erro nas dimensões');
+*/
+Sub dinamica.ValidarErroDuplicidadeDIM_EXPR(vL.texto)
+
+  trace ################;
+  trace dinamica.ValidarErroDuplicidadeDIM_EXPR;
+  trace ################;
+
+  if(Alt(NoOfRows('testeerror'),-1))>0 then
+        trace '###########################';
+        trace 'ERRO - $(vL.texto)';
+        trace '----------------------';
+    FOR i = 0 to NoOfRows('testeerror')-1
+        let vL.valor = Peek('duplicateordem',$(i), 'testeerror');
+        trace '$(vL.texto)';
+        trace '$(vL.valor)';
+        trace '----------------------';
+    NEXT
+        trace '###########################';
+        ERRO NO CADASTRO DE $(vL.texto);
+  endif
+  drop table testeerror;
+
+end sub;

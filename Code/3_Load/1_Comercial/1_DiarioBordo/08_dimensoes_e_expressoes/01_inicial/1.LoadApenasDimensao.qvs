@@ -1,0 +1,15 @@
+sub LoadApenasDimensao
+
+    apenasdimensao:
+    load distinct
+            "$Ordem Visualizar Dimensão",
+            "$DimensaoID",
+            "Rotulo Dimensão",
+            Dimensão,
+            "$Tipo Calculo da Dimensão",
+            GrupoDaDimensao
+        FROM [$(vG.ImportPath)DimensoesMedidas.xlsx]
+        (ooxml, embedded labels, table is ApenasDimensao);
+
+end sub;
+

@@ -1,0 +1,32 @@
+
+/*
+#############
+TRATANDO DIMENSÕES
+#############
+*/
+sub dinamica.SepararDimensoes(vL.PainelName)
+    /*
+    controle para utilizar expressões de classificação dinamica na propriedade da expressão
+    */
+
+  trace ################;
+  trace dinamica.SepararDimensoes;
+  trace ################;
+
+    call LoadApenasDimensao;
+
+    DIM_DIMENSAO_UNICA_$(vL.PainelName):
+    LOAD
+            "$Ordem Visualizar Dimensão"  as [$Ordem Visualizar Dimensão Unica],
+            "$DimensaoID"                 as [$DimensaoID Unica],
+            "Rotulo Dimensão"             as [Rotulo Dimensão Unica],
+            Dimensão                      as [Dimensão Unica],
+            "$Tipo Calculo da Dimensão"   as [$Tipo Calculo da Dimensão Unica],
+            GrupoDaDimensao               as [GrupoDaDimensao Unica]
+    resident apenasdimensao;
+
+    drop table apenasdimensao;
+          
+
+
+end sub;

@@ -1,0 +1,29 @@
+
+sub dinamica.dim_regras
+
+  set vL.PainelName = 'SASFRAUDE';
+
+    trace ################;
+    trace DIM_REGRAS_OPERACIONAL;
+    trace ################;
+
+
+    //CALL TransformacaoStage('DIM_REGRAS','DIM_REGRAS_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+    
+        DIM_REGRAS:
+        LOAD
+          "Descrição Regras",
+          "Tipo Informação Regras",
+          "Nome Informação Regras",
+          subfield("Tags Regras",';') as [Tags Regras],
+          "Status",
+          "prioridade",
+          "ObjectID"
+        FROM [$(paths.QVDProduct.pr_diariobordo)\01_suporte_files\DimensoesMedidas.xlsx]
+        (ooxml, embedded labels, table is Regras);
+
+    call StoreQVD('$(paths.QVDProduct.pr_diariobordo)','DIM_REGRAS_$(vL.PainelName)','DIM_REGRAS',1);
+    //CALL InicializaStoreQvd;
+
+
+end sub;

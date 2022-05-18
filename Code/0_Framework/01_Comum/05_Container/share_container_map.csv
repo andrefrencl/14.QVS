@@ -15,3 +15,4 @@ ex_saidatxt, 14.QVS\TXT\, extract
 ex_saidaqvd, 7.Saídas\QVD\, extract
 tr_1_df_vendas, 14.QVS\code\2_transform\1_DataTransfer\1_VendasDiarioBordo\, transform
 tr_1_imagens, 1.Config\Imagens\, transform
+tr_datatransferqvd, 13.DataTransfer\QVD\, transform

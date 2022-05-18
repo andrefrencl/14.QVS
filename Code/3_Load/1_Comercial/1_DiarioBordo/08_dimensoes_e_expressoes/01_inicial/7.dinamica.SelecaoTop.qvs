@@ -1,0 +1,20 @@
+
+SUB dinamica.SelecaoTop(vL.PainelName)
+
+  trace ################;
+  trace dinamica.SelecaoTop;
+  trace ################;
+      /*
+        controle de limite para graficos
+      */
+      [SELECAOTOP_$(vL.PainelName)]:
+      LOAD * Inline [
+      Quantidade Dinamica
+        10
+        20
+        50
+        100
+        100000
+      ];
+
+end sub;

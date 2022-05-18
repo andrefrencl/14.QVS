@@ -1,0 +1,13 @@
+
+
+sub dinamica.dim_dimensao_unica
+  /* CRIANDO CONJUNTO DE DIMENSÃƒâ€¢ES E MEDIDAS */
+  trace ################;
+  trace DIM_DIMENSAO_UNICA;
+  trace ################;
+
+  CALL TransformacaoStage('DIM_DIMENSAO_UNICA_$(vL.PainelName)','DIM_DIMENSAO_UNICA_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+   call dinamica.SepararDimensoes('$(vL.PainelName)');
+  CALL InicializaStoreQvd;
+end sub;
+    

@@ -2,26 +2,20 @@ SUB index.load.diariobordo
        
        
         DIM_CALENDARIO:
-        LOAD 
-        *
-        FROM [$(paths.QVDTransform.ex_saidaqvd)DIM_CALENDARIO.qvd](qvd);
+        LOAD  *
+        FROM [$(paths.QVDExtract.ex_saidaqvd)DIM_CALENDARIO.qvd](qvd);
 
         DIM_COMPRADOR:
-        LOAD 
-        *
-        FROM [$(paths.QVDTransform.ex_saidaqvd)DIM_COMPRADOR.qvd](qvd);
-
-
+        LOAD *
+        FROM [$(paths.QVDExtract.ex_saidaqvd)DIM_COMPRADOR.qvd](qvd);
 
         DIM_MATERIAIS:
-        LOAD 
-        *
-        FROM [$(paths.QVDTransform.ex_saidaqvd)DIM_MATERIAIS.qvd](qvd);
-
+        LOAD *
+        FROM [$(paths.QVDExtract.ex_saidaqvd)DIM_MATERIAIS.qvd](qvd);
+        
         FATO_DIARIOBORDO:
-        LOAD 
-        *
-        FROM [$(paths.QVDTransform.ex_saidaqvd)DIM_MATERIAIS.qvd](qvd);
+        LOAD *
+        FROM [$(paths.QVDExtract.ex_saidaqvd)FATO_DIARIOBORDO.qvd](qvd);
 
 
 

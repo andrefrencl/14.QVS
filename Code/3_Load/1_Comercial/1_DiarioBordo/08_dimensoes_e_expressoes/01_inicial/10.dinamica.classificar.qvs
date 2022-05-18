@@ -1,0 +1,40 @@
+sub dinamica.classificar(vL.PainelName)
+
+  trace ################;
+  trace dinamica.classificar;
+  trace ################;
+
+    /*
+    controle para utilizar expressões de classificação dinamica na propriedade da expressão
+    */
+
+    noconcatenate
+    DIM_CLASSIFICAR_$(vL.PainelName):
+    LOAD
+        "$Ordem Visualização Medida"        as [$Ordem Visualização Medida Classificar],
+        "$MedidaID"                         AS [$MedidaID Classificar],
+        "$Abas Classificar"                 as [$Abas Classificar]
+
+    FROM [$(vG.ImportPath)DimensoesMedidas.xlsx]
+    (ooxml, embedded labels, table is AbasMedidas$(vL.PainelName))
+      /* separando conjunto de dados de todas abas */
+    where "$Abas Classificar" = 'Todas' 
+    ;
+
+    left join (DIM_CLASSIFICAR_$(vL.PainelName))
+    Load  distinct
+        [$Nome da Variavel]                     as [$Nome da Variavel Classificar],
+        [Nome Medida]                           as [Nome Medida Classificar],
+        [Grupo de Medida]                       as [Grupo de Medida Classificar],
+        [$Calculo Medida]                       as [$Calculo Medida Classificar],
+        [$Conjunto de Exibição]                 as [$Conjunto de Exibição Classificar],
+        [$Formato Resultado]                    as [$Formato Resultado Classificar],
+        [$Dimensão Configurada]                 as [$Dimensão Configurada Classificar],
+        [$MedidaID]                             AS [$MedidaID Classificar]
+    Resident Medidas
+      /* garantindo dados classificaveis */
+      where [$Dimensão Configurada] <> 'Conforme Dimensao'
+      and len(trim([$Dimensão Configurada]))>0
+        ;
+
+end sub;

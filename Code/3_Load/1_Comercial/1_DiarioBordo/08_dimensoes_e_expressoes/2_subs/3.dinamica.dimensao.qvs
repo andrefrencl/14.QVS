@@ -1,0 +1,10 @@
+
+sub dinamica.dimensao
+  trace ################;
+  trace DIMENSAO;
+  trace ################;
+
+  CALL TransformacaoStage('DIMENSAO_$(vL.PainelName)','DIM_DIMENSAO_$(vL.PainelName)','DIMENSIONAL','TR','EST','QVD','CARGA');
+   call dinamica.DimensoesporAbas('$(vL.PainelName)');
+  CALL InicializaStoreQvd;
+end sub;

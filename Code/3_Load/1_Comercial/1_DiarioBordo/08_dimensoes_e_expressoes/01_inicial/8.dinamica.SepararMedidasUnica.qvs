@@ -1,0 +1,53 @@
+
+sub dinamica.SepararMedidasUnica(vL.PainelName)
+
+    trace ################;
+    trace dinamica.SepararMedidasUnica;
+    trace ################;
+
+    /* usando "DIM_MEDIDAS_UNICA" criado no BLOCO ANTERIOR*/
+    noconcatenate
+    DIM_MEDIDAS_UNICA_$(vL.PainelName):
+    load *
+    /* remover Grupos de Análise "vazios", possivelmente expressões para apoio*/
+    where len(trim([Grupo de Medida Unica]))>2
+    ;
+    LOAD
+        [$Nome da Variavel]             AS [$Nome da Variavel Unica],
+        [Nome Medida]                   AS [Nome Medida Unica],
+        [Grupo de Medida]               AS [Grupo de Medida Unica],
+        [$Calculo Medida]               AS [$Calculo Medida Unica],
+        [$Conjunto de Exibição]         AS [$Conjunto de Exibição Unica],
+        [$Formato Resultado]            AS [$Formato Resultado Unica],
+        [$Dimensão Configurada]         AS [$Dimensão Configurada Unica],
+        "$MedidaID"                     as [$MedidaID Unica]
+
+    FROM [$(vG.ImportPath)DimensoesMedidas.xlsx]
+    (ooxml, embedded labels, table is medidas);
+
+    /* tratar para evitar erros de cadastros */
+    noconcatenate
+    testeerror:
+        load duplicateordem
+        /*garantindo apenas o casos duplicados */
+        where contagem>1;
+        Load [$MedidaID Unica] as duplicateordem
+            , count([$MedidaID Unica]) as contagem
+        resident DIM_MEDIDAS_UNICA_$(vL.PainelName)
+        group by [$MedidaID Unica] ;
+
+    CALL dinamica.ValidarErroDuplicidadeDIM_EXPR('MEDIDAS');
+
+    Medidas:  
+    LOAD
+        [$Nome da Variavel Unica]             AS [$Nome da Variavel],
+        [Nome Medida Unica]                   AS [Nome Medida],
+        [Grupo de Medida Unica]               AS [Grupo de Medida],
+        [$Calculo Medida Unica]               AS [$Calculo Medida],
+        [$Conjunto de Exibição Unica]         AS [$Conjunto de Exibição],
+        [$Formato Resultado Unica]            AS [$Formato Resultado],
+        [$Dimensão Configurada Unica]         AS [$Dimensão Configurada],
+        [$MedidaID Unica]                     AS [$MedidaID]
+        
+    Resident DIM_MEDIDAS_UNICA_$(vL.PainelName);
+end sub;
