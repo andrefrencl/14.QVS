@@ -9,6 +9,7 @@ ex_entradas_vendas, 3.entradas\Vendas\, extract
 ex_origem, 5.QVDS\5.0.Origem\, extract
 ex_leadtime, 5.QVDS\5.9.LeadTime\, extract
 ex_prazocompras, 5.QVDS\5.10.Compras\, extract
+ex_estoque, 5.QVDS\5.3.EstoqueNS\, extract
 ex_vendas, 5.QVDS\5.1.Vendas\, extract
 ex_vendasdiariodebordo, 5.QVDS\5.1.vendas\Diario_de_Bordo\, extract
 ex_saidatxt, 14.QVS\TXT\, extract

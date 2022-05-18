@@ -34,9 +34,21 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 			
 			// metricas
 			VB, VB_DEVOL, VPF, QTD,	Desconto, 		// VENDSA
-            (VB/$(vUtilVar))*$(vUtilMes)            as VB_PROJETADO,
-            (VPF/$(vUtilVar))*$(vUtilMes)           as VPF_PROJETADO,
-            (QTD/$(vUtilVar))*$(vUtilMes)           as QTD_PROJETADO,
+            If( Month(MonthName) = Month($(vDataCarregado)) 
+            and year(MonthName) = year($(vDataCarregado)),
+                (VB/$(vUtilVar))*$(vUtilMes),
+                VB)            as VB_PROJETADO,
+
+            If( Month(MonthName) = Month($(vDataCarregado)) 
+            and year(MonthName) = year($(vDataCarregado)),
+                (VPF/$(vUtilVar))*$(vUtilMes),
+                VPF)           as VPF_PROJETADO,
+
+            If( Month(MonthName) = Month($(vDataCarregado)) 
+            and year(MonthName) = year($(vDataCarregado)),
+                (QTD/$(vUtilVar))*$(vUtilMes),
+                QTD)           as QTD_PROJETADO,
+
 			TOTAL_CONTABIL_PV, TOTAL_PONDERADO_PV,  // PRAZO VENDA
 			CMV, VLR_COM_REBATE, 					// CMV
 			QTD_ESTOQUE, VLR_ESTOQUE_PF, 			// ESTOQUE
@@ -91,6 +103,60 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 
     
     /// adicionando MAPA HISTORICO
+    /// só carrega se for historico, senao carrega o mapa atual (fotografia)
+
+    if text(date($(vDataCarregado),'YYYYMM'))='$(p.CarregaMes)' THEN
+
+    trace entrouiuuuu;
+
+        // mes atual
+		let vL.FileNameQVD = 'BW_MAPA_ESTOQUE_$(p.Empresa).qvd';
+		call fG.FileExists('$(paths.QVDExtract.ex_estoque)','$(vL.FileNameQVD)');
+		IF $(vG.FileExists)= 1 THEN 
+            Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)
+            load
+                if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) 
+                                                as NomeEmpresa,
+                $(vDataCarregado)               as %OrderDate, 
+                COD_MATERIAL_SAP&'-'&DES_CD     as [Key Cod Mat CD],
+                DES_CD, 
+                COD_FORNECEDOR_PFAT,
+                COD_FORNECEDOR_PFAT&'-'&
+                    if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) as Key_COMPRADOR,              
+
+                QTD_ESTOQUE_LIVRE * VLR_PRECO_FABRICA as MAPA_VLR_ESTOQUE_LIVRE,
+                QTD_ESTOQUE_TOTAL * VLR_PRECO_FABRICA as MAPA_VLR_ESTOQUETOTAL,
+
+                // CALCULOS para ATRIBUIR VLR de FABRICA / PRODUTO
+                ((QTD_VENDAS_M4*VLR_PRECO_FABRICA)*0.1)+
+                    ((QTD_VENDAS_M3*VLR_PRECO_FABRICA)*0.2)+
+                        ((QTD_VENDAS_M2*VLR_PRECO_FABRICA)*0.3)+
+                            ((QTD_VENDAS_MES_ANTERIOR*VLR_PRECO_FABRICA)*0.4)
+                //QTD_MEDIA_PONDERADA * VLR_PRECO_FABRICA 
+                            as MAPA_VLR_MEDIA_POND
+
+            from [$(paths.QVDExtract.ex_estoque)$(vL.FileNameQVD)](qvd);
+
+        else
+            // se nao existir, adicione campo zerado
+            Concatenate($(p.Metodo)_VENDAS_$(p.Empresa)_$(p.CarregaMes)        
+            load
+                if('$(p.Empresa)'='SC','SANTACRUZ',if('$(p.Empresa)'='PAN','PANPHARMA','ONCOPROD')) 
+                                                as NomeEmpresa,
+                    $(vDataCarregado)           as %OrderDate,
+                    '' AS [Key Cod Mat CD],
+                    '' as DES_CD,
+                    '' as COD_FORNECEDOR_PFAT,
+                    '' as Key_COMPRADOR,
+                    0 as MAPA_VLR_ESTOQUELIVRE, 
+                    0 as MAPA_VLR_ESTOQUETOTAL ,
+                    0 as MAPA_VLR_MEDIAPOND
+                autogenerate 1;
+
+        end if
+
+    else 
+
 		let vL.FileNameQVD = '$(p.Empresa)_MAPA_ESTOQUE_HIST_ $(p.CarregaMes).qvd';
 		call fG.FileExists('$(paths.QVDExtract.ex_entradas_mapa)','$(vL.FileNameQVD)');
 		IF $(vG.FileExists)= 1 THEN 
@@ -127,6 +193,8 @@ sub preparacao.diariobordo(p.Metodo, p.Empresa, p.CarregaMes);
 
         
         end if
+
+    end if
 
 
     /// adicionando LEAD TIME
