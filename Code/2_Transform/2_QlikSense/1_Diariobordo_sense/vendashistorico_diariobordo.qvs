@@ -27,6 +27,7 @@ sub start.historico.vendas.diariobordo
     next
     
     call StoreFile('$(paths.QVDExtract.ex_saidaqvd)','FATO_DIARIOBORDO','tab', 'qvd', 0);
+    drop table FATO_DIARIOBORDO;
     trace ---:: QVD FATO DIARIO BORDO atualizado com sucesso.;
 end sub
 

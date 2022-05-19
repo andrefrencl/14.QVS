@@ -1,0 +1,4 @@
+﻿//includComand
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\2_QlikSense\1_Diariobordo_sense\1_historico_diariobordo.qvs);
+$(Include=C:\QlikView_STCRUZ\DEV\14.QVS\Code\2_Transform\2_QlikSense\1_Diariobordo_sense\vendashistorico_diariobordo.qvs);
+CALL index.historico.vendas.diariobordo;
